@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Marc Brinkmann <git@marcbrinkmann.de>"]
 description = "A constant clock source for your frame timing needs"
 license = "MIT"
+repository = "https://github.com/mbr/ticktock-rs"
 
 [dependencies]
 time = '^0.1.34'
