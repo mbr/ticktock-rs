@@ -1,10 +1,11 @@
 [package]
 name = "ticktock"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Marc Brinkmann <git@marcbrinkmann.de>"]
 description = "A constant clock source for your frame timing needs"
 license = "MIT"
 repository = "https://github.com/mbr/ticktock-rs"
+documentation = "http://mbr.github.io/ticktock-rs/ticktock/"
 
 [dependencies]
 time = '^0.1.34'
