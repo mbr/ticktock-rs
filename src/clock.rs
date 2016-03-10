@@ -31,17 +31,26 @@ pub struct Clock {
 ///
 /// ```
 /// extern crate time;
+/// extern crate ticktock;
 /// use ticktock::clock::Clock;
 ///
-/// // ticks once per second
-/// let mut mclock = Clock::new(time::Duration::seconds(1));
+/// fn main() {
+///     let start = time::SteadyTime::now();
+///     // ticks once per second
+///     let mut clock = Clock::new(time::Duration::seconds(1));
 ///
-/// for tick in mclock.iter() {
-///     // ...
-///     // will wait for the remainder of the time left until the next second
+///     // as soon as the clock starts, it will wait for the next time.
+///     // in this case, we'll start at t = 1 second
+///     for tick in clock.iter() {
+///         // ...
 ///
-///     // a simple break will exit
-///     break;
+///         // a simple break will exit
+///         break;
+///     }
+///
+///    let end = time::SteadyTime::now();
+///
+///    assert!(time::Duration::seconds(1) < end-start);
 /// }
 /// ```
 pub struct ClockIter<'a>(&'a mut Clock);
