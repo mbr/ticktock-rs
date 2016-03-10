@@ -59,7 +59,7 @@ impl Clock {
     /// Creates a new clock.
     ///
     /// Create a clock with a tick size of `tick_len_ms`, in ms.
-    pub fn new(tick_len: time::Duration) -> Clock {
+    pub fn new(tick_len: time::Duration) -> Clock{
         Clock::new_with_start_time(tick_len, time::SteadyTime::now())
     }
 
@@ -68,6 +68,15 @@ impl Clock {
                                start: time::SteadyTime) -> Clock {
         Clock{
             start: start,
+            tick_len: tick_len,
+        }
+    }
+
+    /// Creates a new clock with a different tick length that is synced to
+    /// the original clock
+    pub fn synced(&self, tick_len: time::Duration) -> Clock{
+        Clock{
+            start: self.start,
             tick_len: tick_len,
         }
     }
