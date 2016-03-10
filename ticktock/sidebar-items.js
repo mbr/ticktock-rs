@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["MICROSECOND",""],["MILISECOND",""],["NANOSECOND",""],["SECOND",""]],"mod":[["clock","Frame clock module"],["framecounter","Frame(s per second) counter"]]});
