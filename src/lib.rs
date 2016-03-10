@@ -6,9 +6,7 @@
 extern crate time;
 
 pub mod clock;
-pub mod framecounter;
 
-pub const SECOND: u64 = MILISECOND * 1000;
-pub const MILISECOND: u64 = MICROSECOND * 1000;
-pub const MICROSECOND: u64 = NANOSECOND * 1000;
-pub const NANOSECOND: u64 = 1;
+// Module currently disabled, until I have time (no pun intended) to update
+// the API:
+// pub mod framecounter;
