@@ -60,12 +60,19 @@ impl Clock {
     ///
     /// Create a clock with a tick size of `tick_len_ms`, in ms.
     pub fn new(tick_len: time::Duration) -> Clock {
+        Clock::new_with_start_time(tick_len, time::SteadyTime::now())
+    }
+
+    /// Creates a new clock with a specified start time
+    pub fn new_with_start_time(tick_len: time::Duration,
+                               start: time::SteadyTime) -> Clock {
         Clock{
-            start: time::SteadyTime::now(),
+            start: start,
             tick_len: tick_len,
         }
     }
 
+    /// Get start time
     pub fn start(&self) -> time::SteadyTime {
         self.start
     }
