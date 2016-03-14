@@ -125,14 +125,43 @@ impl Clock {
     pub fn iter(&mut self) -> ClockIter {
         ClockIter(self)
     }
+
+    /// Create a relative clock iterator.
+    ///
+    /// Similar to `iter()`, but the resulting iterator will return a tuple of
+    /// (current tick number, relative time), with relative time being a
+    /// `time::Duration` from the start of the clock.
+    pub fn rel_iter(&mut self) -> ClockIterRelative {
+        ClockIterRelative(self)
+    }
 }
 
 impl<'a> iter::Iterator for ClockIter<'a> {
     type Item = (i64, time::SteadyTime);
+
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.0.wait_until_tick() {
                 Some(v) => return Some(v),
+                None => panic!("Hacking too much time")
+            }
+        }
+    }
+}
+
+/// Similar to `ClockIter`, but returns a relative time instead.
+///
+/// The resulting returned tuple will be of the form `(tick_number,
+/// duration_since_clock_start)`
+pub struct ClockIterRelative<'a>(&'a mut Clock);
+
+impl<'a> iter::Iterator for ClockIterRelative<'a> {
+    type Item = (i64, time::Duration);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.0.wait_until_tick() {
+                Some((n, t)) => return Some((n, t - self.0.start)),
                 None => panic!("Hacking too much time")
             }
         }
