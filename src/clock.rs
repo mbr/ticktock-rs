@@ -119,7 +119,9 @@ impl Clock {
     /// The iterator will iterate forever, calling `wait_until_tick` on each
     /// iteration. It will panic after about 293 years.
     ///
-    /// Returns the current tick number on each iteration.
+    /// Returns (current tick number, absolute time) on each iteration, where
+    /// absolute time is relative to a fixed offset that depends on the machine
+    /// (see `SteadyTime`).
     pub fn iter(&mut self) -> ClockIter {
         ClockIter(self)
     }
