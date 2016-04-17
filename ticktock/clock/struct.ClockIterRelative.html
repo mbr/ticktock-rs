@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `ClockIter` struct in crate `ticktock`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, ClockIter">
+    <meta name="description" content="API documentation for the Rust `ClockIterRelative` struct in crate `ticktock`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ClockIterRelative">
 
-    <title>ticktock::clock::ClockIter - Rust</title>
+    <title>ticktock::clock::ClockIterRelative - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
@@ -27,7 +27,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>ticktock</a>::<wbr><a href='index.html'>clock</a></p><script>window.sidebarCurrent = {name: 'ClockIter', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='../index.html'>ticktock</a>::<wbr><a href='index.html'>clock</a></p><script>window.sidebarCurrent = {name: 'ClockIterRelative', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -42,39 +42,15 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>ticktock</a>::<wbr><a href='index.html'>clock</a>::<wbr><a class='struct' href=''>ClockIter</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>ticktock</a>::<wbr><a href='index.html'>clock</a>::<wbr><a class='struct' href=''>ClockIterRelative</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-16' class='srclink' href='../../src/ticktock/src/clock.rs.html#56' title='goto source code'>[src]</a></span></h1>
-<pre class='rust struct'>pub struct ClockIter&lt;'a&gt;(_);</pre><div class='docblock'><p>A clock iterator</p>
+        </span><a id='src-56' class='srclink' href='../../src/ticktock/src/clock.rs.html#156' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct ClockIterRelative&lt;'a&gt;(_);</pre><div class='docblock'><p>Similar to <code>ClockIter</code>, but returns a relative time instead.</p>
 
-<p>Used to iterate over the clock:</p>
-
-<pre class='rust rust-example-rendered'>
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>time</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>ticktock</span>;
-<span class='kw'>use</span> <span class='ident'>ticktock</span>::<span class='ident'>clock</span>::<span class='ident'>Clock</span>;
-
-<span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='ident'>time</span>::<span class='ident'>SteadyTime</span>::<span class='ident'>now</span>();
-    <span class='comment'>// ticks once per second</span>
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>clock</span> <span class='op'>=</span> <span class='ident'>Clock</span>::<span class='ident'>new</span>(<span class='ident'>time</span>::<span class='ident'>Duration</span>::<span class='ident'>seconds</span>(<span class='number'>1</span>));
-
-    <span class='comment'>// as soon as the clock starts, it will wait for the next time.</span>
-    <span class='comment'>// in this case, we&#39;ll start at t = 1 second</span>
-    <span class='kw'>for</span> <span class='ident'>tick</span> <span class='kw'>in</span> <span class='ident'>clock</span>.<span class='ident'>iter</span>() {
-        <span class='comment'>// ...</span>
-
-        <span class='comment'>// a simple break will exit</span>
-        <span class='kw'>break</span>;
-    }
-
-   <span class='kw'>let</span> <span class='ident'>end</span> <span class='op'>=</span> <span class='ident'>time</span>::<span class='ident'>SteadyTime</span>::<span class='ident'>now</span>();
-
-   <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>time</span>::<span class='ident'>Duration</span>::<span class='ident'>seconds</span>(<span class='number'>1</span>) <span class='op'>&lt;</span> <span class='ident'>end</span><span class='op'>-</span><span class='ident'>start</span>);
-}</pre>
-</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;'a&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.Iterator.html' title='core::iter::Iterator'>Iterator</a> for <a class='struct' href='../../ticktock/clock/struct.ClockIter.html' title='ticktock::clock::ClockIter'>ClockIter</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='associatedtype.Item' class='type'><code>type Item = <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>, <a class='struct' href='../../time/struct.SteadyTime.html' title='time::SteadyTime'>SteadyTime</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a></code></h4>
+<p>The resulting returned tuple will be of the form <code>(tick_number, duration_since_clock_start)</code></p>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;'a&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.Iterator.html' title='core::iter::Iterator'>Iterator</a> for <a class='struct' href='../../ticktock/clock/struct.ClockIterRelative.html' title='ticktock::clock::ClockIterRelative'>ClockIterRelative</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='associatedtype.Item' class='type'><code>type Item = <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>, <a class='struct' href='../../time/duration/struct.Duration.html' title='time::duration::Duration'>Duration</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a></code></h4>
 <h4 id='method.next' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/iter/trait.Iterator.html#method.next' class='fnname'>next</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self::<a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.Iterator.html' title='core::iter::Iterator'>Item</a>&gt;</code></h4>
 <h4 id='method.size_hint' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/iter/trait.Iterator.html#method.size_hint' class='fnname'>size_hint</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>&gt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a></code></h4>
 <h4 id='method.count' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/iter/trait.Iterator.html#method.count' class='fnname'>count</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>

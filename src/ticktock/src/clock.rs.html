@@ -179,6 +179,37 @@
 <span id="136">136</span>
 <span id="137">137</span>
 <span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Frame clock module</span>
 <span class='doccomment'>//!</span>
@@ -301,18 +332,49 @@
     <span class='doccomment'>/// The iterator will iterate forever, calling `wait_until_tick` on each</span>
     <span class='doccomment'>/// iteration. It will panic after about 293 years.</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Returns the current tick number on each iteration.</span>
+    <span class='doccomment'>/// Returns (current tick number, absolute time) on each iteration, where</span>
+    <span class='doccomment'>/// absolute time is relative to a fixed offset that depends on the machine</span>
+    <span class='doccomment'>/// (see `SteadyTime`).</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ClockIter</span> {
         <span class='ident'>ClockIter</span>(<span class='self'>self</span>)
+    }
+
+    <span class='doccomment'>/// Create a relative clock iterator.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Similar to `iter()`, but the resulting iterator will return a tuple of</span>
+    <span class='doccomment'>/// (current tick number, relative time), with relative time being a</span>
+    <span class='doccomment'>/// `time::Duration` from the start of the clock.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>rel_iter</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ClockIterRelative</span> {
+        <span class='ident'>ClockIterRelative</span>(<span class='self'>self</span>)
     }
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>iter</span>::<span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>ClockIter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> (<span class='ident'>i64</span>, <span class='ident'>time</span>::<span class='ident'>SteadyTime</span>);
+
     <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Self</span>::<span class='ident'>Item</span><span class='op'>&gt;</span> {
         <span class='kw'>loop</span> {
             <span class='kw'>match</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>wait_until_tick</span>() {
                 <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>),
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Hacking too much time&quot;</span>)
+            }
+        }
+    }
+}
+
+<span class='doccomment'>/// Similar to `ClockIter`, but returns a relative time instead.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// The resulting returned tuple will be of the form `(tick_number,</span>
+<span class='doccomment'>/// duration_since_clock_start)`</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ClockIterRelative</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Clock</span>);
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>iter</span>::<span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>ClockIterRelative</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> (<span class='ident'>i64</span>, <span class='ident'>time</span>::<span class='ident'>Duration</span>);
+
+    <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Self</span>::<span class='ident'>Item</span><span class='op'>&gt;</span> {
+        <span class='kw'>loop</span> {
+            <span class='kw'>match</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>wait_until_tick</span>() {
+                <span class='prelude-val'>Some</span>((<span class='ident'>n</span>, <span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Some</span>((<span class='ident'>n</span>, <span class='ident'>t</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>start</span>)),
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Hacking too much time&quot;</span>)
             }
         }

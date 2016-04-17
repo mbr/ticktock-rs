@@ -72,7 +72,15 @@ Returns None on clock arithmetic overflow</p>
 <p>The iterator will iterate forever, calling <code>wait_until_tick</code> on each
 iteration. It will panic after about 293 years.</p>
 
-<p>Returns the current tick number on each iteration.</p>
+<p>Returns (current tick number, absolute time) on each iteration, where
+absolute time is relative to a fixed offset that depends on the machine
+(see <code>SteadyTime</code>).</p>
+</div><h4 id='method.rel_iter' class='method'><code>fn <a href='#method.rel_iter' class='fnname'>rel_iter</a>(&amp;mut self) -&gt; <a class='struct' href='../../ticktock/clock/struct.ClockIterRelative.html' title='ticktock::clock::ClockIterRelative'>ClockIterRelative</a></code></h4>
+<div class='docblock'><p>Create a relative clock iterator.</p>
+
+<p>Similar to <code>iter()</code>, but the resulting iterator will return a tuple of
+(current tick number, relative time), with relative time being a
+<code>time::Duration</code> from the start of the clock.</p>
 </div></div></section>
     <section id='search' class="content hidden"></section>
 
