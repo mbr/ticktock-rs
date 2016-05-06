@@ -16,7 +16,7 @@ use ::util::NanoConv;
 /// use ticktock::timer::Timer;
 ///
 /// fn main() {
-///     // create two independant timers
+///     // create two independent timers
 ///
 ///     let mut t1 = Timer::new(time::Duration::from_millis(50));
 ///     let mut t2 = Timer::new(time::Duration::from_millis(150));
