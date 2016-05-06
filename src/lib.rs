@@ -6,6 +6,7 @@
 extern crate time;
 
 pub mod clock;
+pub mod timer;
 
 // Module currently disabled, until I have time (no pun intended) to update
 // the API:
