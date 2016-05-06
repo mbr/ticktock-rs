@@ -22,7 +22,48 @@ impl NanoConv for time::Duration {
 
 /// Interval-timer
 ///
-/// An interval timer
+/// Interval timers can be used to track and act on fixed time intervals when
+/// said timers are neither in charge of delay/run decision-making nor running
+/// in a separate thread:
+///
+/// ```
+/// extern crate ticktock;
+/// use std::time;
+/// use std::thread;
+/// use ticktock::timer::Timer;
+///
+/// fn main() {
+///     // create two independant timers
+///
+///     let mut t1 = Timer::new(time::Duration::from_millis(50));
+///     let mut t2 = Timer::new(time::Duration::from_millis(150));
+///
+///     let delay = time::Duration::from_millis(100);
+///
+///     // for testing purpose, run 10 times only
+///     for _ in 1..10 {
+///         let now = time::Instant::now();
+///
+///         if t1.has_fired(now) {
+///             println!("T1 has fired!");
+///
+///             // notify the timer it has run for this tick or it will attempt
+///             // to run again.
+///             t1.reset(now);
+///         }
+///
+///         // the `handle()` function works like "has_fired", but updates
+///         // the timer automatically
+///         if t2.handle(now) {
+///             println!("T2 has fired!");
+///         }
+///
+///         // sleep 100 ms
+///         thread::sleep(delay);
+///     }
+/// }
+///
+/// ```
 pub struct Timer {
     next_tick: time::Instant,
     tick_len: time::Duration,
@@ -32,7 +73,7 @@ pub struct Timer {
 impl Timer {
     /// Creates a new timer.
     ///
-    /// Create a timer with a tick length of `tick_len_ms`, in ms.
+    /// Create a timer with a tick length of `tick_len_ms` in ms.
     pub fn new(tick_len: time::Duration) -> Timer{
         Timer::new_with_start_time(tick_len, time::Instant::now())
     }
@@ -46,12 +87,17 @@ impl Timer {
         }
     }
 
+    /// Returns true if the timer has fired since the last time passed to
+    /// `reset()`.
+    ///
+    /// `t` is the current time and should be passed in.
     #[inline(always)]
     pub fn has_fired(&self, t: time::Instant) -> bool {
         self.next_tick <= t
     }
 
     #[inline(always)]
+    /// Remaining time until the timer will fire again.
     pub fn remaining(&self, t: time::Instant) -> time::Duration {
         if self.next_tick <= t {
             time::Duration::new(0, 0)
@@ -60,6 +106,7 @@ impl Timer {
         }
     }
 
+    /// Notify the timer it has been executed.
     #[inline(always)]
     pub fn reset(&mut self, t: time::Instant) -> u32 {
         if t >= self.next_tick {
@@ -70,6 +117,16 @@ impl Timer {
             lost_ticks
         } else {
             0
+        }
+    }
+
+    /// Combines `has_fired()` and `reset()`.
+    pub fn handle(&mut self, t: time::Instant) -> bool {
+        if self.has_fired(t) {
+            self.reset(t);
+            true
+        } else {
+            false
         }
     }
 }
