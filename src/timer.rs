@@ -1,3 +1,5 @@
+//! Non-selfupdating interval timers
+
 use std::time;
 
 const NANOS_PER_SEC: u64 = 1_000_000_000;
