@@ -1,4 +1,4 @@
-//! Non-selfupdating interval timers
+//! Non self-updating interval timers
 
 use std::time;
 use ::util::NanoConv;
