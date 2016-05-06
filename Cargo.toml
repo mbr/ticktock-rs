@@ -1,6 +1,6 @@
 [package]
 name = "ticktock"
-version = "0.2.3"
+version = "0.3.0"
 authors = ["Marc Brinkmann <git@marcbrinkmann.de>"]
 description = "A constant clock source for your frame timing needs"
 license = "MIT"
