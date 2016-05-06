@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["clock","Frame clock module"]]});
+initSidebarItems({"mod":[["clock","Frame clock module"],["timer",""]]});

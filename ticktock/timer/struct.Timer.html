@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Timer` struct in crate `ticktock`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Timer">
+
+    <title>ticktock::timer::Timer - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>ticktock</a>::<wbr><a href='index.html'>timer</a></p><script>window.sidebarCurrent = {name: 'Timer', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>ticktock</a>::<wbr><a href='index.html'>timer</a>::<wbr><a class='struct' href=''>Timer</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-83' class='srclink' href='../../src/ticktock/src/timer.rs.html#67-70' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Timer {
+    // some fields omitted
+}</pre><div class='docblock'><p>Interval-timer</p>
+
+<p>Interval timers can be used to track and act on fixed time intervals when
+said timers are neither in charge of delay/run decision-making nor running
+in a separate thread:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>ticktock</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>time</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>;
+<span class='kw'>use</span> <span class='ident'>ticktock</span>::<span class='ident'>timer</span>::<span class='ident'>Timer</span>;
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='comment'>// create two independant timers</span>
+
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t1</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>(<span class='ident'>time</span>::<span class='ident'>Duration</span>::<span class='ident'>from_millis</span>(<span class='number'>50</span>));
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t2</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>(<span class='ident'>time</span>::<span class='ident'>Duration</span>::<span class='ident'>from_millis</span>(<span class='number'>150</span>));
+
+    <span class='kw'>let</span> <span class='ident'>delay</span> <span class='op'>=</span> <span class='ident'>time</span>::<span class='ident'>Duration</span>::<span class='ident'>from_millis</span>(<span class='number'>100</span>);
+
+    <span class='comment'>// for testing purpose, run 10 times only</span>
+    <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='number'>1</span>..<span class='number'>10</span> {
+        <span class='kw'>let</span> <span class='ident'>now</span> <span class='op'>=</span> <span class='ident'>time</span>::<span class='ident'>Instant</span>::<span class='ident'>now</span>();
+
+        <span class='kw'>if</span> <span class='ident'>t1</span>.<span class='ident'>has_fired</span>(<span class='ident'>now</span>) {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;T1 has fired!&quot;</span>);
+
+            <span class='comment'>// notify the timer it has run for this tick or it will attempt</span>
+            <span class='comment'>// to run again.</span>
+            <span class='ident'>t1</span>.<span class='ident'>reset</span>(<span class='ident'>now</span>);
+        }
+
+        <span class='comment'>// the `handle()` function works like &quot;has_fired&quot;, but updates</span>
+        <span class='comment'>// the timer automatically</span>
+        <span class='kw'>if</span> <span class='ident'>t2</span>.<span class='ident'>handle</span>(<span class='ident'>now</span>) {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;T2 has fired!&quot;</span>);
+        }
+
+        <span class='comment'>// sleep 100 ms</span>
+        <span class='ident'>thread</span>::<span class='ident'>sleep</span>(<span class='ident'>delay</span>);
+    }
+}
+</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../ticktock/timer/struct.Timer.html' title='ticktock::timer::Timer'>Timer</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(tick_len: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>) -&gt; <a class='struct' href='../../ticktock/timer/struct.Timer.html' title='ticktock::timer::Timer'>Timer</a></code></h4>
+<div class='docblock'><p>Creates a new timer.</p>
+
+<p>Create a timer with a tick length of <code>tick_len_ms</code> in ms.</p>
+</div><h4 id='method.new_with_start_time' class='method'><code>fn <a href='#method.new_with_start_time' class='fnname'>new_with_start_time</a>(tick_len: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>, start: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='struct' href='../../ticktock/timer/struct.Timer.html' title='ticktock::timer::Timer'>Timer</a></code></h4>
+<div class='docblock'><p>Creates a new timer with a specific start time</p>
+</div><h4 id='method.has_fired' class='method'><code>fn <a href='#method.has_fired' class='fnname'>has_fired</a>(&amp;self, t: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if the timer has fired since the last time passed to
+<code>reset()</code>.</p>
+
+<p><code>t</code> is the current time and should be passed in.</p>
+</div><h4 id='method.remaining' class='method'><code>fn <a href='#method.remaining' class='fnname'>remaining</a>(&amp;self, t: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a></code></h4>
+<div class='docblock'><p>Remaining time until the timer will fire again.</p>
+</div><h4 id='method.reset' class='method'><code>fn <a href='#method.reset' class='fnname'>reset</a>(&amp;mut self, t: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a></code></h4>
+<div class='docblock'><p>Notify the timer it has been executed.</p>
+</div><h4 id='method.handle' class='method'><code>fn <a href='#method.handle' class='fnname'>handle</a>(&amp;mut self, t: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Combines <code>has_fired()</code> and <code>reset()</code>.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "ticktock";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>
