@@ -46,26 +46,25 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-13' class='srclink' href='../../src/ticktock/src/clock.rs.html#21-26' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-8' class='srclink' href='../../src/ticktock/src/clock.rs.html#10-15' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Clock {
     // some fields omitted
 }</pre><div class='docblock'><p>Clock structure.</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../ticktock/clock/struct.Clock.html' title='ticktock::clock::Clock'>Clock</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(tick_len: <a class='struct' href='../../time/duration/struct.Duration.html' title='time::duration::Duration'>Duration</a>) -&gt; <a class='struct' href='../../ticktock/clock/struct.Clock.html' title='ticktock::clock::Clock'>Clock</a></code></h4>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../ticktock/clock/struct.Clock.html' title='ticktock::clock::Clock'>Clock</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(tick_len: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>) -&gt; <a class='struct' href='../../ticktock/clock/struct.Clock.html' title='ticktock::clock::Clock'>Clock</a></code></h4>
 <div class='docblock'><p>Creates a new clock.</p>
 
 <p>Create a clock with a tick size of <code>tick_len_ms</code>, in ms.</p>
-</div><h4 id='method.new_with_start_time' class='method'><code>fn <a href='#method.new_with_start_time' class='fnname'>new_with_start_time</a>(tick_len: <a class='struct' href='../../time/duration/struct.Duration.html' title='time::duration::Duration'>Duration</a>, start: <a class='struct' href='../../time/struct.SteadyTime.html' title='time::SteadyTime'>SteadyTime</a>) -&gt; <a class='struct' href='../../ticktock/clock/struct.Clock.html' title='ticktock::clock::Clock'>Clock</a></code></h4>
+</div><h4 id='method.new_with_start_time' class='method'><code>fn <a href='#method.new_with_start_time' class='fnname'>new_with_start_time</a>(tick_len: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>, start: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='struct' href='../../ticktock/clock/struct.Clock.html' title='ticktock::clock::Clock'>Clock</a></code></h4>
 <div class='docblock'><p>Creates a new clock with a specified start time</p>
-</div><h4 id='method.synced' class='method'><code>fn <a href='#method.synced' class='fnname'>synced</a>(&amp;self, tick_len: <a class='struct' href='../../time/duration/struct.Duration.html' title='time::duration::Duration'>Duration</a>) -&gt; <a class='struct' href='../../ticktock/clock/struct.Clock.html' title='ticktock::clock::Clock'>Clock</a></code></h4>
+</div><h4 id='method.synced' class='method'><code>fn <a href='#method.synced' class='fnname'>synced</a>(&amp;self, tick_len: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>) -&gt; <a class='struct' href='../../ticktock/clock/struct.Clock.html' title='ticktock::clock::Clock'>Clock</a></code></h4>
 <div class='docblock'><p>Creates a new clock with a different tick length that is synced to
 the original clock</p>
-</div><h4 id='method.start' class='method'><code>fn <a href='#method.start' class='fnname'>start</a>(&amp;self) -&gt; <a class='struct' href='../../time/struct.SteadyTime.html' title='time::SteadyTime'>SteadyTime</a></code></h4>
+</div><h4 id='method.start' class='method'><code>fn <a href='#method.start' class='fnname'>start</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a></code></h4>
 <div class='docblock'><p>Get start time</p>
-</div><h4 id='method.wait_until_tick' class='method'><code>fn <a href='#method.wait_until_tick' class='fnname'>wait_until_tick</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>, <a class='struct' href='../../time/struct.SteadyTime.html' title='time::SteadyTime'>SteadyTime</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>&gt;</code></h4>
+</div><h4 id='method.wait_until_tick' class='method'><code>fn <a href='#method.wait_until_tick' class='fnname'>wait_until_tick</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a></code></h4>
 <div class='docblock'><p>Waits for the next clock tick.</p>
 
-<p>Will wait until the next tick and return the current tick count.
-Returns None on clock arithmetic overflow</p>
+<p>Will wait until the next tick and return the current tick count.</p>
 </div><h4 id='method.iter' class='method'><code>fn <a href='#method.iter' class='fnname'>iter</a>(&amp;mut self) -&gt; <a class='struct' href='../../ticktock/clock/struct.ClockIter.html' title='ticktock::clock::ClockIter'>ClockIter</a></code></h4>
 <div class='docblock'><p>Creates a clock iterator.</p>
 
@@ -74,7 +73,7 @@ iteration. It will panic after about 293 years.</p>
 
 <p>Returns (current tick number, absolute time) on each iteration, where
 absolute time is relative to a fixed offset that depends on the machine
-(see <code>SteadyTime</code>).</p>
+(see <code>Instant</code>).</p>
 </div><h4 id='method.rel_iter' class='method'><code>fn <a href='#method.rel_iter' class='fnname'>rel_iter</a>(&amp;mut self) -&gt; <a class='struct' href='../../ticktock/clock/struct.ClockIterRelative.html' title='ticktock::clock::ClockIterRelative'>ClockIterRelative</a></code></h4>
 <div class='docblock'><p>Create a relative clock iterator.</p>
 

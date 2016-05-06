@@ -183,57 +183,19 @@
 <span id="140">140</span>
 <span id="141">141</span>
 <span id="142">142</span>
-<span id="143">143</span>
-<span id="144">144</span>
-<span id="145">145</span>
-<span id="146">146</span>
-<span id="147">147</span>
-<span id="148">148</span>
-<span id="149">149</span>
-<span id="150">150</span>
-<span id="151">151</span>
-<span id="152">152</span>
-<span id="153">153</span>
-<span id="154">154</span>
-<span id="155">155</span>
-<span id="156">156</span>
-<span id="157">157</span>
-<span id="158">158</span>
-<span id="159">159</span>
-<span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
-<span id="163">163</span>
-<span id="164">164</span>
-<span id="165">165</span>
-<span id="166">166</span>
-<span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Frame clock module</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Contains a clocking that ticks in a fixed interval as precisely as</span>
 <span class='doccomment'>//! possible.</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::{<span class='self'>self</span>, <span class='ident'>iter</span>, <span class='ident'>thread</span>};
-<span class='kw'>use</span> <span class='ident'>time</span>;
-
-<span class='comment'>// FIXME: factor this out into another crate</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>time_to_std</span>(<span class='ident'>d_in</span>: <span class='kw-2'>&amp;</span><span class='ident'>time</span>::<span class='ident'>Duration</span>) <span class='op'>-&gt;</span> <span class='ident'>std</span>::<span class='ident'>time</span>::<span class='ident'>Duration</span> {
-    <span class='ident'>std</span>::<span class='ident'>time</span>::<span class='ident'>Duration</span>::<span class='ident'>new</span>(
-        <span class='ident'>d_in</span>.<span class='ident'>num_seconds</span>() <span class='kw'>as</span> <span class='ident'>u64</span>,
-        <span class='kw'>match</span> <span class='ident'>d_in</span>.<span class='ident'>num_nanoseconds</span>() {
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='number'>0</span>,
-            <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> (<span class='ident'>v</span> <span class='op'>%</span> <span class='number'>1_000_000_000</span>) <span class='kw'>as</span> <span class='ident'>u32</span>
-        }
-    )
-}
+<span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>iter</span>, <span class='ident'>time</span>, <span class='ident'>thread</span>};
+<span class='kw'>use</span> ::<span class='ident'>util</span>::<span class='ident'>NanoConv</span>;
 
 <span class='doccomment'>/// Clock structure.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Clock</span> {
     <span class='doccomment'>/// Start time of the clock, in ns since epoch</span>
-    <span class='ident'>start</span>: <span class='ident'>time</span>::<span class='ident'>SteadyTime</span>,
+    <span class='ident'>start</span>: <span class='ident'>time</span>::<span class='ident'>Instant</span>,
     <span class='doccomment'>/// Tick length</span>
     <span class='ident'>tick_len</span>: <span class='ident'>time</span>::<span class='ident'>Duration</span>,
 }
@@ -243,14 +205,15 @@
 <span class='doccomment'>/// Used to iterate over the clock:</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// ```</span>
-<span class='doccomment'>/// extern crate time;</span>
 <span class='doccomment'>/// extern crate ticktock;</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// use std::time;</span>
 <span class='doccomment'>/// use ticktock::clock::Clock;</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// fn main() {</span>
-<span class='doccomment'>///     let start = time::SteadyTime::now();</span>
+<span class='doccomment'>///     let start = time::Instant::now();</span>
 <span class='doccomment'>///     // ticks once per second</span>
-<span class='doccomment'>///     let mut clock = Clock::new(time::Duration::seconds(1));</span>
+<span class='doccomment'>///     let mut clock = Clock::new(time::Duration::from_secs(1));</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>///     // as soon as the clock starts, it will wait for the next time.</span>
 <span class='doccomment'>///     // in this case, we&#39;ll start at t = 1 second</span>
@@ -261,9 +224,9 @@
 <span class='doccomment'>///         break;</span>
 <span class='doccomment'>///     }</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>///    let end = time::SteadyTime::now();</span>
+<span class='doccomment'>///    let end = time::Instant::now();</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>///    assert!(time::Duration::seconds(1) &lt; end-start);</span>
+<span class='doccomment'>///    assert!(time::Duration::from_secs(1) &lt; end-start);</span>
 <span class='doccomment'>/// }</span>
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ClockIter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Clock</span>);
@@ -273,12 +236,12 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Create a clock with a tick size of `tick_len_ms`, in ms.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>tick_len</span>: <span class='ident'>time</span>::<span class='ident'>Duration</span>) <span class='op'>-&gt;</span> <span class='ident'>Clock</span>{
-        <span class='ident'>Clock</span>::<span class='ident'>new_with_start_time</span>(<span class='ident'>tick_len</span>, <span class='ident'>time</span>::<span class='ident'>SteadyTime</span>::<span class='ident'>now</span>())
+        <span class='ident'>Clock</span>::<span class='ident'>new_with_start_time</span>(<span class='ident'>tick_len</span>, <span class='ident'>time</span>::<span class='ident'>Instant</span>::<span class='ident'>now</span>())
     }
 
     <span class='doccomment'>/// Creates a new clock with a specified start time</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new_with_start_time</span>(<span class='ident'>tick_len</span>: <span class='ident'>time</span>::<span class='ident'>Duration</span>,
-                               <span class='ident'>start</span>: <span class='ident'>time</span>::<span class='ident'>SteadyTime</span>) <span class='op'>-&gt;</span> <span class='ident'>Clock</span> {
+                               <span class='ident'>start</span>: <span class='ident'>time</span>::<span class='ident'>Instant</span>) <span class='op'>-&gt;</span> <span class='ident'>Clock</span> {
         <span class='ident'>Clock</span>{
             <span class='ident'>start</span>: <span class='ident'>start</span>,
             <span class='ident'>tick_len</span>: <span class='ident'>tick_len</span>,
@@ -295,36 +258,28 @@
     }
 
     <span class='doccomment'>/// Get start time</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>start</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>time</span>::<span class='ident'>SteadyTime</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>start</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>time</span>::<span class='ident'>Instant</span> {
         <span class='self'>self</span>.<span class='ident'>start</span>
     }
 
     <span class='doccomment'>/// Waits for the next clock tick.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Will wait until the next tick and return the current tick count.</span>
-    <span class='doccomment'>/// Returns None on clock arithmetic overflow</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>wait_until_tick</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>i64</span>, <span class='ident'>time</span>::<span class='ident'>SteadyTime</span>)<span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>wait_until_tick</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>u64</span>, <span class='ident'>time</span>::<span class='ident'>Instant</span>) {
         <span class='comment'>// uses signed math because ntp might put us in the past</span>
-        <span class='kw'>let</span> <span class='ident'>now</span> <span class='op'>=</span> <span class='ident'>time</span>::<span class='ident'>SteadyTime</span>::<span class='ident'>now</span>();
+        <span class='kw'>let</span> <span class='ident'>now</span> <span class='op'>=</span> <span class='ident'>time</span>::<span class='ident'>Instant</span>::<span class='ident'>now</span>();
 
-        <span class='kw'>let</span> <span class='ident'>elapsed_ns</span> <span class='op'>=</span> <span class='kw'>match</span> (<span class='ident'>now</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>start</span>).<span class='ident'>num_nanoseconds</span>() {
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>None</span>,
-            <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>
-        };
-
-        <span class='kw'>let</span> <span class='ident'>tick_len_ns</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>tick_len</span>.<span class='ident'>num_nanoseconds</span>() {
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>None</span>,
-            <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>
-        };
+        <span class='kw'>let</span> <span class='ident'>elapsed_ns</span> <span class='op'>=</span> (<span class='ident'>now</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>start</span>).<span class='ident'>as_ns</span>();
+        <span class='kw'>let</span> <span class='ident'>tick_len_ns</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>tick_len</span>.<span class='ident'>as_ns</span>();
 
         <span class='kw'>let</span> <span class='ident'>current_tick_num</span> <span class='op'>=</span> <span class='ident'>elapsed_ns</span> <span class='op'>/</span> <span class='ident'>tick_len_ns</span>;
         <span class='kw'>let</span> <span class='ident'>next_tick_num</span> <span class='op'>=</span> <span class='ident'>current_tick_num</span> <span class='op'>+</span> <span class='number'>1</span>;
 
-        <span class='kw'>let</span> <span class='ident'>next_tick</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>start</span> <span class='op'>+</span> <span class='self'>self</span>.<span class='ident'>tick_len</span> <span class='op'>*</span> <span class='ident'>next_tick_num</span> <span class='kw'>as</span> <span class='ident'>i32</span>;
+        <span class='kw'>let</span> <span class='ident'>next_tick</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>start</span> <span class='op'>+</span> <span class='self'>self</span>.<span class='ident'>tick_len</span> <span class='op'>*</span> <span class='ident'>next_tick_num</span> <span class='kw'>as</span> <span class='ident'>u32</span>;
         <span class='kw'>let</span> <span class='ident'>until_next</span>: <span class='ident'>time</span>::<span class='ident'>Duration</span> <span class='op'>=</span> <span class='ident'>next_tick</span> <span class='op'>-</span> <span class='ident'>now</span>;
 
-        <span class='ident'>thread</span>::<span class='ident'>sleep</span>(<span class='ident'>time_to_std</span>(<span class='kw-2'>&amp;</span><span class='ident'>until_next</span>));
-        <span class='kw'>return</span> <span class='prelude-val'>Some</span>((<span class='ident'>next_tick_num</span>, <span class='ident'>next_tick</span>))
+        <span class='ident'>thread</span>::<span class='ident'>sleep</span>(<span class='ident'>until_next</span>);
+        <span class='kw'>return</span> (<span class='ident'>next_tick_num</span>, <span class='ident'>next_tick</span>)
     }
 
     <span class='doccomment'>/// Creates a clock iterator.</span>
@@ -334,7 +289,7 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Returns (current tick number, absolute time) on each iteration, where</span>
     <span class='doccomment'>/// absolute time is relative to a fixed offset that depends on the machine</span>
-    <span class='doccomment'>/// (see `SteadyTime`).</span>
+    <span class='doccomment'>/// (see `Instant`).</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ClockIter</span> {
         <span class='ident'>ClockIter</span>(<span class='self'>self</span>)
     }
@@ -350,15 +305,10 @@
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>iter</span>::<span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>ClockIter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> (<span class='ident'>i64</span>, <span class='ident'>time</span>::<span class='ident'>SteadyTime</span>);
+    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> (<span class='ident'>u64</span>, <span class='ident'>time</span>::<span class='ident'>Instant</span>);
 
     <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Self</span>::<span class='ident'>Item</span><span class='op'>&gt;</span> {
-        <span class='kw'>loop</span> {
-            <span class='kw'>match</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>wait_until_tick</span>() {
-                <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>),
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Hacking too much time&quot;</span>)
-            }
-        }
+        <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>wait_until_tick</span>())
     }
 }
 
@@ -369,15 +319,11 @@
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ClockIterRelative</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Clock</span>);
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>iter</span>::<span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>ClockIterRelative</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> (<span class='ident'>i64</span>, <span class='ident'>time</span>::<span class='ident'>Duration</span>);
+    <span class='kw'>type</span> <span class='ident'>Item</span> <span class='op'>=</span> (<span class='ident'>u64</span>, <span class='ident'>time</span>::<span class='ident'>Duration</span>);
 
     <span class='kw'>fn</span> <span class='ident'>next</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Self</span>::<span class='ident'>Item</span><span class='op'>&gt;</span> {
-        <span class='kw'>loop</span> {
-            <span class='kw'>match</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>wait_until_tick</span>() {
-                <span class='prelude-val'>Some</span>((<span class='ident'>n</span>, <span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Some</span>((<span class='ident'>n</span>, <span class='ident'>t</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>start</span>)),
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Hacking too much time&quot;</span>)
-            }
-        }
+        <span class='kw'>let</span> (<span class='ident'>n</span>, <span class='ident'>t</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>wait_until_tick</span>();
+        <span class='prelude-val'>Some</span>((<span class='ident'>n</span>, <span class='ident'>t</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>start</span>))
     }
 }
 </pre>

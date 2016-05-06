@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `src/util.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
-    <title>lib.rs.html -- source</title>
+    <title>util.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
@@ -54,20 +54,36 @@
 <span id="11">11</span>
 <span id="12">12</span>
 <span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
 </pre><pre class='rust '>
-<span class='doccomment'>//! Timing module for frame-based applications</span>
-<span class='doccomment'>//!</span>
-<span class='doccomment'>//! Contains methods for slowing down to a fixed framerate, as well as</span>
-<span class='doccomment'>//! measuring actual frames per second.</span>
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>time</span>;
 
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>clock</span>;
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>timer</span>;
+<span class='kw'>const</span> <span class='ident'>NANOS_PER_SEC</span>: <span class='ident'>u64</span> <span class='op'>=</span> <span class='number'>1_000_000_000</span>;
 
-<span class='kw'>mod</span> <span class='ident'>util</span>;
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>NanoConv</span> {
+    <span class='kw'>fn</span> <span class='ident'>as_ns</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span>;
+    <span class='kw'>fn</span> <span class='ident'>from_ns</span>(<span class='ident'>ns</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span>;
+}
 
-<span class='comment'>// Module currently disabled, until I have time (no pun intended) to update</span>
-<span class='comment'>// the API:</span>
-<span class='comment'>// pub mod framecounter;</span>
+<span class='kw'>impl</span> <span class='ident'>NanoConv</span> <span class='kw'>for</span> <span class='ident'>time</span>::<span class='ident'>Duration</span> {
+    <span class='kw'>fn</span> <span class='ident'>as_ns</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span> {
+        <span class='self'>self</span>.<span class='ident'>as_secs</span>().<span class='ident'>checked_mul</span>(<span class='ident'>NANOS_PER_SEC</span>)
+            .<span class='ident'>expect</span>(<span class='string'>&quot;overflow during nanosecond conversion&quot;</span>)
+            .<span class='ident'>checked_add</span>(<span class='self'>self</span>.<span class='ident'>subsec_nanos</span>() <span class='kw'>as</span> <span class='ident'>u64</span>)
+            .<span class='ident'>expect</span>(<span class='string'>&quot;overflow during nanosecond conversion&quot;</span>)
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>from_ns</span>(<span class='ident'>ns</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>time</span>::<span class='ident'>Duration</span> {
+        <span class='ident'>time</span>::<span class='ident'>Duration</span>::<span class='ident'>new</span>(<span class='ident'>ns</span> <span class='op'>/</span> <span class='ident'>NANOS_PER_SEC</span>, (<span class='ident'>ns</span> <span class='op'>%</span> <span class='ident'>NANOS_PER_SEC</span>) <span class='kw'>as</span> <span class='ident'>u32</span>)
+    }
+}
 </pre>
 </section>
     <section id='search' class="content hidden"></section>
