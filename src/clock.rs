@@ -3,24 +3,13 @@
 //! Contains a clocking that ticks in a fixed interval as precisely as
 //! possible.
 
-use std::{self, iter, thread};
-use time;
-
-// FIXME: factor this out into another crate
-pub fn time_to_std(d_in: &time::Duration) -> std::time::Duration {
-    std::time::Duration::new(
-        d_in.num_seconds() as u64,
-        match d_in.num_nanoseconds() {
-            None => 0,
-            Some(v) => (v % 1_000_000_000) as u32
-        }
-    )
-}
+use std::{iter, time, thread};
+use ::util::NanoConv;
 
 /// Clock structure.
 pub struct Clock {
     /// Start time of the clock, in ns since epoch
-    start: time::SteadyTime,
+    start: time::Instant,
     /// Tick length
     tick_len: time::Duration,
 }
@@ -30,14 +19,15 @@ pub struct Clock {
 /// Used to iterate over the clock:
 ///
 /// ```
-/// extern crate time;
 /// extern crate ticktock;
+///
+/// use std::time;
 /// use ticktock::clock::Clock;
 ///
 /// fn main() {
-///     let start = time::SteadyTime::now();
+///     let start = time::Instant::now();
 ///     // ticks once per second
-///     let mut clock = Clock::new(time::Duration::seconds(1));
+///     let mut clock = Clock::new(time::Duration::from_secs(1));
 ///
 ///     // as soon as the clock starts, it will wait for the next time.
 ///     // in this case, we'll start at t = 1 second
@@ -48,9 +38,9 @@ pub struct Clock {
 ///         break;
 ///     }
 ///
-///    let end = time::SteadyTime::now();
+///    let end = time::Instant::now();
 ///
-///    assert!(time::Duration::seconds(1) < end-start);
+///    assert!(time::Duration::from_secs(1) < end-start);
 /// }
 /// ```
 pub struct ClockIter<'a>(&'a mut Clock);
@@ -60,12 +50,12 @@ impl Clock {
     ///
     /// Create a clock with a tick size of `tick_len_ms`, in ms.
     pub fn new(tick_len: time::Duration) -> Clock{
-        Clock::new_with_start_time(tick_len, time::SteadyTime::now())
+        Clock::new_with_start_time(tick_len, time::Instant::now())
     }
 
     /// Creates a new clock with a specified start time
     pub fn new_with_start_time(tick_len: time::Duration,
-                               start: time::SteadyTime) -> Clock {
+                               start: time::Instant) -> Clock {
         Clock{
             start: start,
             tick_len: tick_len,
@@ -82,36 +72,28 @@ impl Clock {
     }
 
     /// Get start time
-    pub fn start(&self) -> time::SteadyTime {
+    pub fn start(&self) -> time::Instant {
         self.start
     }
 
     /// Waits for the next clock tick.
     ///
     /// Will wait until the next tick and return the current tick count.
-    /// Returns None on clock arithmetic overflow
-    pub fn wait_until_tick(&self) -> Option<(i64, time::SteadyTime)> {
+    pub fn wait_until_tick(&self) -> (u64, time::Instant) {
         // uses signed math because ntp might put us in the past
-        let now = time::SteadyTime::now();
+        let now = time::Instant::now();
 
-        let elapsed_ns = match (now - self.start).num_nanoseconds() {
-            None => return None,
-            Some(v) => v
-        };
-
-        let tick_len_ns = match self.tick_len.num_nanoseconds() {
-            None => return None,
-            Some(v) => v
-        };
+        let elapsed_ns = (now - self.start).as_ns();
+        let tick_len_ns = self.tick_len.as_ns();
 
         let current_tick_num = elapsed_ns / tick_len_ns;
         let next_tick_num = current_tick_num + 1;
 
-        let next_tick = self.start + self.tick_len * next_tick_num as i32;
+        let next_tick = self.start + self.tick_len * next_tick_num as u32;
         let until_next: time::Duration = next_tick - now;
 
-        thread::sleep(time_to_std(&until_next));
-        return Some((next_tick_num, next_tick))
+        thread::sleep(until_next);
+        return (next_tick_num, next_tick)
     }
 
     /// Creates a clock iterator.
@@ -121,7 +103,7 @@ impl Clock {
     ///
     /// Returns (current tick number, absolute time) on each iteration, where
     /// absolute time is relative to a fixed offset that depends on the machine
-    /// (see `SteadyTime`).
+    /// (see `Instant`).
     pub fn iter(&mut self) -> ClockIter {
         ClockIter(self)
     }
@@ -137,15 +119,10 @@ impl Clock {
 }
 
 impl<'a> iter::Iterator for ClockIter<'a> {
-    type Item = (i64, time::SteadyTime);
+    type Item = (u64, time::Instant);
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            match self.0.wait_until_tick() {
-                Some(v) => return Some(v),
-                None => panic!("Hacking too much time")
-            }
-        }
+        Some(self.0.wait_until_tick())
     }
 }
 
@@ -156,14 +133,10 @@ impl<'a> iter::Iterator for ClockIter<'a> {
 pub struct ClockIterRelative<'a>(&'a mut Clock);
 
 impl<'a> iter::Iterator for ClockIterRelative<'a> {
-    type Item = (i64, time::Duration);
+    type Item = (u64, time::Duration);
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            match self.0.wait_until_tick() {
-                Some((n, t)) => return Some((n, t - self.0.start)),
-                None => panic!("Hacking too much time")
-            }
-        }
+        let (n, t) = self.0.wait_until_tick();
+        Some((n, t - self.0.start))
     }
 }

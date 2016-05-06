@@ -8,4 +8,3 @@ repository = "https://github.com/mbr/ticktock-rs"
 documentation = "http://mbr.github.io/ticktock-rs/ticktock/"
 
 [dependencies]
-time = '^0.1.34'
