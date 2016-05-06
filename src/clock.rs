@@ -29,7 +29,7 @@ pub struct Clock {
 ///     // ticks once per second
 ///     let mut clock = Clock::new(time::Duration::from_secs(1));
 ///
-///     // as soon as the clock starts, it will wait for the next time.
+///     // as soon as the clock starts, it will wait for the next tick.
 ///     // in this case, we'll start at t = 1 second
 ///     for tick in clock.iter() {
 ///         // ...
