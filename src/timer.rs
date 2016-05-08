@@ -113,10 +113,22 @@ impl Timer {
         }
     }
 
-    pub fn set_tick_len(&mut self, tick_len: time::Duration) {
+    /// Sets the tick length
+    ///
+    /// If `wait` is `true` the tick length will be changed for the tick
+    /// following after the current one, which might take a long time if the
+    /// tick length was set to a large value before.
+    ///
+    /// Passing in `wait` as `false` causes the tick length to be changed
+    /// immediately, which could result in the current tick to end instantly.
+    pub fn set_tick_len(&mut self, tick_len: time::Duration, wait: bool) {
+        if ! wait {
+            self.next_tick = self.next_tick - self.tick_len + tick_len
+        }
         self.tick_len = tick_len
     }
 
+    /// Returns the current tick length
     fn tick_len(&self) -> time::Duration {
         self.tick_len
     }
