@@ -112,6 +112,14 @@ impl Timer {
             0
         }
     }
+
+    pub fn set_tick_len(&mut self, tick_len: time::Duration) {
+        self.tick_len = tick_len
+    }
+
+    fn tick_len(&self) -> time::Duration {
+        self.tick_len
+    }
 }
 
 
