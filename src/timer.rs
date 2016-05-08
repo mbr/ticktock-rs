@@ -70,6 +70,16 @@ impl Timer {
         }
     }
 
+    /// Combines `has_fired()` and `reset()`.
+    pub fn handle(&mut self, t: time::Instant) -> bool {
+        if self.has_fired(t) {
+            self.reset(t);
+            true
+        } else {
+            false
+        }
+    }
+
     /// Returns true if the timer has fired since the last time passed to
     /// `reset()`.
     ///
@@ -100,16 +110,6 @@ impl Timer {
             lost_ticks
         } else {
             0
-        }
-    }
-
-    /// Combines `has_fired()` and `reset()`.
-    pub fn handle(&mut self, t: time::Instant) -> bool {
-        if self.has_fired(t) {
-            self.reset(t);
-            true
-        } else {
-            false
         }
     }
 }
