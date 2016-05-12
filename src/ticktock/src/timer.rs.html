@@ -231,6 +231,7 @@
 <span id="188">188</span>
 <span id="189">189</span>
 <span id="190">190</span>
+<span id="191">191</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Non self-updating interval timers</span>
 
@@ -281,6 +282,7 @@
 <span class='doccomment'>/// }</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// ```</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Copy</span>, <span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Timer</span> {
     <span class='ident'>next_tick</span>: <span class='ident'>time</span>::<span class='ident'>Instant</span>,
     <span class='ident'>tick_len</span>: <span class='ident'>time</span>::<span class='ident'>Duration</span>,
