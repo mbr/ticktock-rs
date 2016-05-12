@@ -211,8 +211,28 @@
 <span id="168">168</span>
 <span id="169">169</span>
 <span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
 </pre><pre class='rust '>
-<span class='doccomment'>//! Non-selfupdating interval timers</span>
+<span class='doccomment'>//! Non self-updating interval timers</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>time</span>;
 <span class='kw'>use</span> ::<span class='ident'>util</span>::<span class='ident'>NanoConv</span>;
@@ -230,7 +250,7 @@
 <span class='doccomment'>/// use ticktock::timer::Timer;</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// fn main() {</span>
-<span class='doccomment'>///     // create two independant timers</span>
+<span class='doccomment'>///     // create two independent timers</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>///     let mut t1 = Timer::new(time::Duration::from_millis(50));</span>
 <span class='doccomment'>///     let mut t2 = Timer::new(time::Duration::from_millis(150));</span>
@@ -284,6 +304,16 @@
         }
     }
 
+    <span class='doccomment'>/// Combines `has_fired()` and `reset()`.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>t</span>: <span class='ident'>time</span>::<span class='ident'>Instant</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>has_fired</span>(<span class='ident'>t</span>) {
+            <span class='self'>self</span>.<span class='ident'>reset</span>(<span class='ident'>t</span>);
+            <span class='boolval'>true</span>
+        } <span class='kw'>else</span> {
+            <span class='boolval'>false</span>
+        }
+    }
+
     <span class='doccomment'>/// Returns true if the timer has fired since the last time passed to</span>
     <span class='doccomment'>/// `reset()`.</span>
     <span class='doccomment'>///</span>
@@ -317,14 +347,24 @@
         }
     }
 
-    <span class='doccomment'>/// Combines `has_fired()` and `reset()`.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>t</span>: <span class='ident'>time</span>::<span class='ident'>Instant</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>has_fired</span>(<span class='ident'>t</span>) {
-            <span class='self'>self</span>.<span class='ident'>reset</span>(<span class='ident'>t</span>);
-            <span class='boolval'>true</span>
-        } <span class='kw'>else</span> {
-            <span class='boolval'>false</span>
+    <span class='doccomment'>/// Sets the tick length</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// If `wait` is `true` the tick length will be changed for the tick</span>
+    <span class='doccomment'>/// following after the current one, which might take a long time if the</span>
+    <span class='doccomment'>/// tick length was set to a large value before.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Passing in `wait` as `false` causes the tick length to be changed</span>
+    <span class='doccomment'>/// immediately, which could result in the current tick to end instantly.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_tick_len</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>tick_len</span>: <span class='ident'>time</span>::<span class='ident'>Duration</span>, <span class='ident'>wait</span>: <span class='ident'>bool</span>) {
+        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>wait</span> {
+            <span class='self'>self</span>.<span class='ident'>next_tick</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>next_tick</span> <span class='op'>-</span> <span class='self'>self</span>.<span class='ident'>tick_len</span> <span class='op'>+</span> <span class='ident'>tick_len</span>
         }
+        <span class='self'>self</span>.<span class='ident'>tick_len</span> <span class='op'>=</span> <span class='ident'>tick_len</span>
+    }
+
+    <span class='doccomment'>/// Returns the current tick length</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>tick_len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>time</span>::<span class='ident'>Duration</span> {
+        <span class='self'>self</span>.<span class='ident'>tick_len</span>
     }
 }
 

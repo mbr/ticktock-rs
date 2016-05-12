@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["clock","Frame clock module"],["timer","Non-selfupdating interval timers"]]});
+initSidebarItems({"mod":[["clock","Frame clock module"],["timer","Non self-updating interval timers"]]});

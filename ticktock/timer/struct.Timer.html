@@ -62,7 +62,7 @@ in a separate thread:</p>
 <span class='kw'>use</span> <span class='ident'>ticktock</span>::<span class='ident'>timer</span>::<span class='ident'>Timer</span>;
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
-    <span class='comment'>// create two independant timers</span>
+    <span class='comment'>// create two independent timers</span>
 
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t1</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>(<span class='ident'>time</span>::<span class='ident'>Duration</span>::<span class='ident'>from_millis</span>(<span class='number'>50</span>));
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t2</span> <span class='op'>=</span> <span class='ident'>Timer</span>::<span class='ident'>new</span>(<span class='ident'>time</span>::<span class='ident'>Duration</span>::<span class='ident'>from_millis</span>(<span class='number'>150</span>));
@@ -98,6 +98,8 @@ in a separate thread:</p>
 <p>Create a timer with a tick length of <code>tick_len_ms</code> in ms.</p>
 </div><h4 id='method.new_with_start_time' class='method'><code>fn <a href='#method.new_with_start_time' class='fnname'>new_with_start_time</a>(tick_len: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>, start: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='struct' href='../../ticktock/timer/struct.Timer.html' title='ticktock::timer::Timer'>Timer</a></code></h4>
 <div class='docblock'><p>Creates a new timer with a specific start time</p>
+</div><h4 id='method.handle' class='method'><code>fn <a href='#method.handle' class='fnname'>handle</a>(&amp;mut self, t: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Combines <code>has_fired()</code> and <code>reset()</code>.</p>
 </div><h4 id='method.has_fired' class='method'><code>fn <a href='#method.has_fired' class='fnname'>has_fired</a>(&amp;self, t: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
 <div class='docblock'><p>Returns true if the timer has fired since the last time passed to
 <code>reset()</code>.</p>
@@ -107,8 +109,17 @@ in a separate thread:</p>
 <div class='docblock'><p>Remaining time until the timer will fire again.</p>
 </div><h4 id='method.reset' class='method'><code>fn <a href='#method.reset' class='fnname'>reset</a>(&amp;mut self, t: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a></code></h4>
 <div class='docblock'><p>Notify the timer it has been executed.</p>
-</div><h4 id='method.handle' class='method'><code>fn <a href='#method.handle' class='fnname'>handle</a>(&amp;mut self, t: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/struct.Instant.html' title='std::time::Instant'>Instant</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
-<div class='docblock'><p>Combines <code>has_fired()</code> and <code>reset()</code>.</p>
+</div><h4 id='method.set_tick_len' class='method'><code>fn <a href='#method.set_tick_len' class='fnname'>set_tick_len</a>(&amp;mut self, tick_len: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>, wait: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>)</code></h4>
+<div class='docblock'><p>Sets the tick length</p>
+
+<p>If <code>wait</code> is <code>true</code> the tick length will be changed for the tick
+following after the current one, which might take a long time if the
+tick length was set to a large value before.</p>
+
+<p>Passing in <code>wait</code> as <code>false</code> causes the tick length to be changed
+immediately, which could result in the current tick to end instantly.</p>
+</div><h4 id='method.tick_len' class='method'><code>fn <a href='#method.tick_len' class='fnname'>tick_len</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a></code></h4>
+<div class='docblock'><p>Returns the current tick length</p>
 </div></div></section>
     <section id='search' class="content hidden"></section>
 
