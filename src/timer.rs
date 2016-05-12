@@ -129,7 +129,7 @@ impl Timer {
     }
 
     /// Returns the current tick length
-    fn tick_len(&self) -> time::Duration {
+    pub fn tick_len(&self) -> time::Duration {
         self.tick_len
     }
 }
