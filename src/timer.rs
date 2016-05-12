@@ -47,6 +47,7 @@ use ::util::NanoConv;
 /// }
 ///
 /// ```
+#[derive(Copy, Clone, Debug)]
 pub struct Timer {
     next_tick: time::Instant,
     tick_len: time::Duration,
