@@ -4,9 +4,9 @@
 //! measuring actual frames per second.
 
 pub mod clock;
+pub mod util;
 pub mod timer;
 
-mod util;
 
 // Module currently disabled, until I have time (no pun intended) to update
 // the API:
