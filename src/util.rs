@@ -23,7 +23,8 @@ pub trait NanoConv {
 
 impl NanoConv for time::Duration {
     fn as_ns(&self) -> u64 {
-        self.as_secs().checked_mul(NANOS_PER_SEC)
+        self.as_secs()
+            .checked_mul(NANOS_PER_SEC)
             .expect("overflow during nanosecond conversion")
             .checked_add(self.subsec_nanos() as u64)
             .expect("overflow during nanosecond conversion")
@@ -63,5 +64,17 @@ impl FloatConv for time::Duration {
         let secs = fsecs.trunc() as u64;
         let subsec_nanos = (fsecs.fract() * NANOS_PER_SEC as f64) as u32;
         time::Duration::new(secs, subsec_nanos)
+    }
+}
+
+pub trait FromFSecs {
+    fn from_fsecs(self: Self) -> time::Duration;
+}
+
+impl FromFSecs for f64 {
+    fn from_fsecs(self) -> time::Duration {
+        let secs = self.round() as u64;
+        let nanos = ((self % 1.0) * 1_000_000_000.0) as u32;
+        time::Duration::new(secs, nanos)
     }
 }
