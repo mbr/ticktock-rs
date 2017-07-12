@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["clock","Frame clock module"],["timer","Non self-updating interval timers"],["util","Utility module"]]});
