@@ -4,7 +4,7 @@
 //! possible.
 
 use std::{iter, time, thread};
-use ::util::NanoConv;
+use util::NanoConv;
 
 /// Clock structure.
 pub struct Clock {
@@ -49,14 +49,13 @@ impl Clock {
     /// Creates a new clock.
     ///
     /// Create a clock with a tick size of `tick_len_ms`, in ms.
-    pub fn new(tick_len: time::Duration) -> Clock{
+    pub fn new(tick_len: time::Duration) -> Clock {
         Clock::new_with_start_time(tick_len, time::Instant::now())
     }
 
     /// Creates a new clock with a specified start time
-    pub fn new_with_start_time(tick_len: time::Duration,
-                               start: time::Instant) -> Clock {
-        Clock{
+    pub fn new_with_start_time(tick_len: time::Duration, start: time::Instant) -> Clock {
+        Clock {
             start: start,
             tick_len: tick_len,
         }
@@ -64,8 +63,8 @@ impl Clock {
 
     /// Creates a new clock with a different tick length that is synced to
     /// the original clock
-    pub fn synced(&self, tick_len: time::Duration) -> Clock{
-        Clock{
+    pub fn synced(&self, tick_len: time::Duration) -> Clock {
+        Clock {
             start: self.start,
             tick_len: tick_len,
         }
@@ -93,7 +92,7 @@ impl Clock {
         let until_next: time::Duration = next_tick - now;
 
         thread::sleep(until_next);
-        return (next_tick_num, next_tick)
+        return (next_tick_num, next_tick);
     }
 
     /// Creates a clock iterator.
