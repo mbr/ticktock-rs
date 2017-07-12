@@ -6,6 +6,7 @@
 pub mod clock;
 pub mod util;
 pub mod timer;
+pub mod timer2;
 
 
 // Module currently disabled, until I have time (no pun intended) to update
