@@ -1,6 +1,41 @@
+//! Interval-timer
+//!
+//! Interval timers can be used to periodically perform an action or mutate
+//! a stored value. Values are owned by the timer itself, but can be retrieved.
+//!
+//! The timer does not run in a separate thread, but rather expects to be
+//! triggered from the outside occasionally, with time being passed in usually
+//! to save on syscalls.
+//!
+//! Example:
+//!
+//! ```
+//! extern crate ticktock;
+//!
+//! use std::time;
+//! use ticktock::timer2::Timer;
+//!
+//! fn main() {
+//!     let now = time::Instant::now();
+//!     let mut heartbeat = Timer::apply(|_, count| { *count += 1; *count }, 0)
+//!                               .every(time::Duration::from_millis(500))
+//!                               .start(now);
+//!
+//!     for i in 0..10 {
+//!     let now = time::Instant::now();
+//!          if let Some(n) = heartbeat.update(now) {
+//!              println!("Heartbeat: {}", n);
+//!          }
+//!     }
+//! }
+//! ```
+
 use std::time;
 use util::NanoSeconds;
 
+/// A timer builder
+///
+/// Internally used to construct timers; cannot be constructed manually.
 #[derive(Debug)]
 pub struct TimerBuilder<F, V, R>
 where
@@ -26,6 +61,10 @@ where
         }
     }
 
+    /// Execute time in fixed intervals
+    ///
+    /// The timer will repeat after waiting `interval`. Time spent executing
+    /// the timer is ignored.
     #[inline]
     pub fn every(mut self, interval: time::Duration) -> Self {
         self.interval = Some(interval);
@@ -33,6 +72,7 @@ where
         self
     }
 
+    /// Execute once after a delay
     #[inline]
     pub fn once(mut self, delay: time::Duration) -> Self {
         self.interval = Some(delay);
@@ -40,6 +80,10 @@ where
         self
     }
 
+    /// Start the timer
+    ///
+    /// Starting means recording the passed in `now` as the timer's start time
+    /// (and basis for calculations).
     pub fn start(self, now: time::Instant) -> Timer<F, V, R> {
         let interval = self.interval.expect("no timing set");
         let next_tick = now + interval;
@@ -70,19 +114,31 @@ impl<F, V, R> Timer<F, V, R>
 where
     F: Fn(time::Duration, &mut V) -> R,
 {
+    /// Construct new timer
+    ///
+    /// The timer will periodically execute `F`, which will alter a value
+    /// initially set to `V`.
+    ///
+    /// `F` will be passed the elapsed time since the last execution as an
+    /// argument. `F` may return a calculated result from updating.
     #[inline]
     pub fn apply(func: F, initial: V) -> TimerBuilder<F, V, R> {
         TimerBuilder::new(func, initial)
     }
 
+    /// Get timer interval
     pub fn interval(&self) -> time::Duration {
         self.interval
     }
 
+    /// Replace the stored value
     pub fn set_value(&mut self, value: V) {
         self.value = value;
     }
 
+    /// Execute function and calculate next execution instant
+    ///
+    /// If
     pub fn update(&mut self, now: time::Instant) -> Option<R> {
         // check if timer needs to fire
         if self.next_tick > now {
@@ -108,6 +164,7 @@ impl<F, V: Clone, R> Timer<F, V, R>
 where
     F: Fn(time::Duration, &mut V) -> R,
 {
+    /// Returns a copy of the value stored inside timer.
     #[inline]
     pub fn value(&self) -> V {
         self.value.clone()
