@@ -13,7 +13,7 @@
 //! extern crate ticktock;
 //!
 //! use std::time;
-//! use ticktock::timer::Timer;
+//! use ticktock::Timer;
 //!
 //! fn main() {
 //!     let now = time::Instant::now();

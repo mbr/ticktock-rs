@@ -3,6 +3,8 @@
 //! Contains a clocking that ticks in a fixed interval as precisely as
 //! possible.
 
+// FIXME: clock should start immediately, not waiting the initial interval
+
 use std::{iter, time, thread};
 use util::{SecondsFloat, NanoSeconds};
 
@@ -22,7 +24,7 @@ pub struct Clock {
 /// extern crate ticktock;
 ///
 /// use std::time;
-/// use ticktock::clock::Clock;
+/// use ticktock::Clock;
 ///
 /// fn main() {
 ///     let start = time::Instant::now();

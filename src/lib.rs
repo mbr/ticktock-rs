@@ -7,7 +7,7 @@ pub mod clock;
 pub mod util;
 pub mod timer;
 
-
-// Module currently disabled, until I have time (no pun intended) to update
-// the API:
-// pub mod framecounter;
+pub use clock::Clock;
+pub use timer::Timer;
+pub use util::NanoSeconds;
+pub use util::SecondsFloat;
