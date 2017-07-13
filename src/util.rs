@@ -53,15 +53,16 @@ pub trait FloatConv {
 
 impl FloatConv for time::Duration {
     fn as_fsecs(&self) -> f64 {
+        // no issues here, just loss of precision
         let mut fsecs = self.as_secs() as f64;
-        // FIXME: use checked math here an document
         fsecs += (self.subsec_nanos() as f64) / NANOS_PER_SEC as f64;
         fsecs
     }
 
-    // https://github.com/rust-lang/rust/issues/10184
     fn from_fsecs(&self, fsecs: f64) -> time::Duration {
+        // https://github.com/rust-lang/rust/issues/10184
         let secs = fsecs.trunc() as u64;
+        // size will always be <= 999_999_999, which is < 2^32
         let subsec_nanos = (fsecs.fract() * NANOS_PER_SEC as f64) as u32;
         time::Duration::new(secs, subsec_nanos)
     }
@@ -73,7 +74,9 @@ pub trait FromFSecs {
 
 impl FromFSecs for f64 {
     fn from_fsecs(self) -> time::Duration {
+        // https://github.com/rust-lang/rust/issues/10184
         let secs = self.round() as u64;
+        // size will always be <= 999_999_999, which is < 2^32
         let nanos = ((self % 1.0) * 1_000_000_000.0) as u32;
         time::Duration::new(secs, nanos)
     }
