@@ -1,192 +1,281 @@
-//! Non self-updating interval timers
+//! Interval-timer
+//!
+//! Interval timers can be used to periodically perform an action or mutate
+//! a stored value. Values are owned by the timer itself, but can be retrieved.
+//!
+//! The timer does not run in a separate thread, but rather expects to be
+//! triggered from the outside occasionally, with time being passed in usually
+//! to save on syscalls.
+//!
+//! Example:
+//!
+//! ```
+//! extern crate ticktock;
+//!
+//! use std::time;
+//! use ticktock::timer::Timer;
+//!
+//! fn main() {
+//!     let now = time::Instant::now();
+//!     let mut heartbeat = Timer::apply(|_, count| { *count += 1; *count }, 0)
+//!                               .every(time::Duration::from_millis(500))
+//!                               .start(now);
+//!
+//!     for i in 0..10 {
+//!     let now = time::Instant::now();
+//!          if let Some(n) = heartbeat.update(now) {
+//!              println!("Heartbeat: {}", n);
+//!          }
+//!     }
+//! }
+//! ```
 
 use std::time;
 use util::NanoSeconds;
 
-/// Interval-timer
+/// A timer builder
 ///
-/// Interval timers can be used to track and act on fixed time intervals when
-/// said timers are neither in charge of delay/run decision-making nor running
-/// in a separate thread:
-///
-/// ```
-/// extern crate ticktock;
-/// use std::time;
-/// use std::thread;
-/// use ticktock::timer::Timer;
-///
-/// fn main() {
-///     // create two independent timers
-///
-///     let mut t1 = Timer::new(time::Duration::from_millis(50));
-///     let mut t2 = Timer::new(time::Duration::from_millis(150));
-///
-///     let delay = time::Duration::from_millis(100);
-///
-///     // for testing purpose, run 10 times only
-///     for _ in 1..10 {
-///         let now = time::Instant::now();
-///
-///         if t1.has_fired(now) {
-///             println!("T1 has fired!");
-///
-///             // notify the timer it has run for this tick or it will attempt
-///             // to run again.
-///             t1.reset(now);
-///         }
-///
-///         // the `handle()` function works like "has_fired", but updates
-///         // the timer automatically
-///         if t2.handle(now) {
-///             println!("T2 has fired!");
-///         }
-///
-///         // sleep 100 ms
-///         thread::sleep(delay);
-///     }
-/// }
-///
-/// ```
-#[derive(Copy, Clone, Debug)]
-pub struct Timer {
-    next_tick: time::Instant,
-    tick_len: time::Duration,
+/// Internally used to construct timers; cannot be constructed manually.
+#[derive(Debug)]
+pub struct TimerBuilder<F, V, R>
+where
+    F: Fn(time::Duration, &mut V) -> R,
+{
+    func: F,
+    initial: V,
+    interval: Option<time::Duration>,
+    repeat: bool,
 }
 
-
-impl Timer {
-    /// Creates a new timer.
-    ///
-    /// Create a timer with a tick length of `tick_len_ms` in ms.
-    pub fn new(tick_len: time::Duration) -> Timer {
-        Timer::new_with_start_time(tick_len, time::Instant::now())
+impl<F, V, R> TimerBuilder<F, V, R>
+where
+    F: Fn(time::Duration, &mut V) -> R,
+{
+    #[inline]
+    fn new(func: F, initial: V) -> TimerBuilder<F, V, R> {
+        TimerBuilder {
+            func: func,
+            initial: initial,
+            interval: None,
+            repeat: true,
+        }
     }
 
-    /// Creates a new timer with a specific start time
-    pub fn new_with_start_time(tick_len: time::Duration, start: time::Instant) -> Timer {
+    /// Execute time in fixed intervals
+    ///
+    /// The timer will repeat after waiting `interval`. Time spent executing
+    /// the timer is ignored.
+    #[inline]
+    pub fn every(mut self, interval: time::Duration) -> Self {
+        self.interval = Some(interval);
+        self.repeat = true;
+        self
+    }
+
+    /// Execute once after a delay
+    #[inline]
+    pub fn once(mut self, delay: time::Duration) -> Self {
+        self.interval = Some(delay);
+        self.repeat = false;
+        self
+    }
+
+    /// Start the timer
+    ///
+    /// Starting means recording the passed in `now` as the timer's start time
+    /// (and basis for calculations).
+    pub fn start(self, now: time::Instant) -> Timer<F, V, R> {
+        let interval = self.interval.expect("no timing set");
+        let next_tick = now + interval;
+
         Timer {
-            next_tick: start + tick_len,
-            tick_len: tick_len,
+            func: self.func,
+            value: self.initial,
+            interval: interval,
+            interval_ns: interval.as_ns(),
+            next_tick: next_tick,
         }
     }
+}
 
-    /// Combines `has_fired()` and `reset()`.
-    pub fn handle(&mut self, t: time::Instant) -> bool {
-        if self.has_fired(t) {
-            self.reset(t);
-            true
-        } else {
-            false
-        }
-    }
+#[derive(Debug)]
+pub struct Timer<F, V, R>
+where
+    F: Fn(time::Duration, &mut V) -> R,
+{
+    func: F,
+    value: V,
+    interval: time::Duration,
+    interval_ns: u64,
+    next_tick: time::Instant,
+}
 
-    /// Returns true if the timer has fired since the last time passed to
-    /// `reset()`.
+impl<F, V, R> Timer<F, V, R>
+where
+    F: Fn(time::Duration, &mut V) -> R,
+{
+    /// Construct new timer
     ///
-    /// `t` is the current time and should be passed in.
-    #[inline(always)]
-    pub fn has_fired(&self, t: time::Instant) -> bool {
-        self.next_tick <= t
-    }
-
-    #[inline(always)]
-    /// Remaining time until the timer will fire again.
-    pub fn remaining(&self, t: time::Instant) -> time::Duration {
-        if self.next_tick <= t {
-            time::Duration::new(0, 0)
-        } else {
-            self.next_tick - t
-        }
-    }
-
-    /// Notify the timer it has been executed.
-    #[inline(always)]
-    pub fn reset(&mut self, t: time::Instant) -> u32 {
-        if t >= self.next_tick {
-            // calculate how many ticks we already passed
-            let skipped_ns = (t - self.next_tick).as_ns();
-            let lost_ticks = (skipped_ns / self.tick_len.as_ns()) as u32;
-            self.next_tick = self.next_tick + self.tick_len * (1 + lost_ticks);
-            lost_ticks
-        } else {
-            0
-        }
-    }
-
-    /// Sets the tick length
+    /// The timer will periodically execute `F`, which will alter a value
+    /// initially set to `V`.
     ///
-    /// If `wait` is `true` the tick length will be changed for the tick
-    /// following after the current one, which might take a long time if the
-    /// tick length was set to a large value before.
-    ///
-    /// Passing in `wait` as `false` causes the tick length to be changed
-    /// immediately, which could result in the current tick to end instantly.
-    pub fn set_tick_len(&mut self, tick_len: time::Duration, wait: bool) {
-        if !wait {
-            self.next_tick = self.next_tick - self.tick_len + tick_len
-        }
-        self.tick_len = tick_len
+    /// `F` will be passed the elapsed time since the last execution as an
+    /// argument. `F` may return a calculated result from updating.
+    #[inline]
+    pub fn apply(func: F, initial: V) -> TimerBuilder<F, V, R> {
+        TimerBuilder::new(func, initial)
     }
 
-    /// Returns the current tick length
-    pub fn tick_len(&self) -> time::Duration {
-        self.tick_len
+    /// Get timer interval
+    pub fn interval(&self) -> time::Duration {
+        self.interval
+    }
+
+    /// Replace the stored value
+    pub fn set_value(&mut self, value: V) {
+        self.value = value;
+    }
+
+    /// Execute function and calculate next execution instant
+    ///
+    /// If
+    pub fn update(&mut self, now: time::Instant) -> Option<R> {
+        // check if timer needs to fire
+        if self.next_tick > now {
+            return None;
+        }
+
+        // calculate delta and update tick
+        let dt = now - self.next_tick + self.interval;
+
+        // calculate how many ticks we already passed
+        let dt_ns = dt.as_ns();
+        let ticks = dt_ns / self.interval_ns;
+
+        // next tick
+        self.next_tick += self.interval * ticks as u32;
+
+        // handle tick, update value
+        Some((&self.func)(dt, &mut self.value))
+    }
+}
+
+impl<F, V: Clone, R> Timer<F, V, R>
+where
+    F: Fn(time::Duration, &mut V) -> R,
+{
+    /// Returns a copy of the value stored inside timer.
+    #[inline]
+    pub fn value(&self) -> V {
+        self.value.clone()
+    }
+}
+
+impl<F, V, R> AsRef<V> for Timer<F, V, R>
+where
+    F: Fn(time::Duration, &mut V) -> R,
+{
+    #[inline(always)]
+    fn as_ref(&self) -> &V {
+        &self.value
+    }
+}
+
+impl<F, V, R> AsMut<V> for Timer<F, V, R>
+where
+    F: Fn(time::Duration, &mut V) -> R,
+{
+    #[inline(always)]
+    fn as_mut(&mut self) -> &mut V {
+        &mut self.value
     }
 }
 
 
 #[cfg(test)]
 mod tests {
-    use std::{thread, time};
     use super::*;
 
     #[test]
-    fn test_single_timer() {
-        let timer = Timer::new(time::Duration::from_millis(50));
-        assert!(!timer.has_fired(time::Instant::now()));
-        thread::sleep(time::Duration::from_millis(50));
-        assert!(timer.has_fired(time::Instant::now()));
+    fn construction() {
+        let now = time::Instant::now();
+        Timer::apply(|_, _| (), 123)
+            .every(time::Duration::from_millis(500))
+            .start(now);
+        Timer::apply(
+            |_, v| {
+                *v += 1;
+                *v
+            },
+            12,
+        ).every(time::Duration::from_millis(500))
+            .start(now);
     }
 
     #[test]
-    fn test_minimum_duration() {
+    fn value_retrieval() {
         let now = time::Instant::now();
+        let mut t = Timer::apply(|_, _| (), 123)
+            .every(time::Duration::from_millis(500))
+            .start(now);
 
-        let mut t1 = Timer::new_with_start_time(time::Duration::from_millis(10), now);
-        let mut t2 = Timer::new_with_start_time(time::Duration::from_millis(50), now);
+        assert_eq!(*t.as_ref(), 123);
+        assert_eq!(*t.as_mut(), 123);
+        assert_eq!(t.value(), 123);
+    }
 
-        let later = now + time::Duration::from_millis(15);
+    #[test]
+    fn test_single_timer() {
+        let now = time::Instant::now();
+        let mut timer = Timer::apply(|_, count| *count += 1, 0)
+            .every(time::Duration::from_millis(50))
+            .start(now);
 
-        // check if timers fire correctly
-        assert!(t1.has_fired(later));
-        assert!(!t2.has_fired(later));
 
-        // check remaining time
-        assert_eq!(t1.remaining(later), time::Duration::from_millis(0));
-        assert_eq!(t2.remaining(later), time::Duration::from_millis(35));
+        assert_eq!(timer.value(), 0);
+        let future = now + time::Duration::from_millis(49);
+        timer.update(future);
+        assert_eq!(timer.value(), 0);
+        timer.update(future);
+        assert_eq!(timer.value(), 0);
 
-        // reset timers
-        t1.reset(later);
-        t2.reset(later);
+        let future2 = now + time::Duration::from_millis(50);
+        timer.update(future2);
+        assert_eq!(timer.value(), 1);
+        timer.update(future2);
+        assert_eq!(timer.value(), 1);
 
-        assert!(!t1.has_fired(later));
-        assert!(!t2.has_fired(later));
+        let future3 = now + time::Duration::from_millis(51);
+        timer.update(future3);
+        assert_eq!(timer.value(), 1);
+        timer.update(future3);
+        assert_eq!(timer.value(), 1);
 
-        // check updated times
-        assert_eq!(t1.remaining(later), time::Duration::from_millis(5));
-        assert_eq!(t2.remaining(later), time::Duration::from_millis(35));
+        let future4 = now + time::Duration::from_millis(100);
+        timer.update(future4);
+        assert_eq!(timer.value(), 2);
+        timer.update(future4);
+        assert_eq!(timer.value(), 2);
 
-        // try multiple timers
-        let timers = vec![t2, t1];
+        let future5 = now + time::Duration::from_millis(10000);
+        timer.update(future5);
+        assert_eq!(timer.value(), 3);
+        timer.update(future5);
+        assert_eq!(timer.value(), 3);
+    }
 
-        // find max and min
-        assert_eq!(
-            timers.iter().map(|t| t.remaining(later)).min().unwrap(),
-            time::Duration::from_millis(5)
-        );
-        assert_eq!(
-            timers.iter().map(|t| t.remaining(later)).max().unwrap(),
-            time::Duration::from_millis(35)
-        );
+    #[test]
+    fn test_just_called() {
+        let now = time::Instant::now();
+        let mut timer = Timer::apply(|_, fired| *fired = true, false)
+            .every(time::Duration::from_millis(100))
+            .start(now);
+
+        timer.update(now);
+
+        if timer.value() {
+            // reset after it fired
+            timer.set_value(false);
+        }
     }
 }
