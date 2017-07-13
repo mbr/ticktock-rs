@@ -9,7 +9,7 @@ use util::{SecondsFloat, NanoSeconds};
 /// Clock structure.
 pub struct Clock {
     /// Start time of the clock, in ns since epoch
-    start: time::Instant,
+    started_at: time::Instant,
     /// Tick length
     tick_len: time::Duration,
 }
@@ -56,7 +56,7 @@ impl Clock {
     /// Creates a new clock with a specified start time
     pub fn new_with_start_time(tick_len: time::Duration, start: time::Instant) -> Clock {
         Clock {
-            start: start,
+            started_at: start,
             tick_len: tick_len,
         }
     }
@@ -77,14 +77,14 @@ impl Clock {
     /// the original clock
     pub fn synced(&self, tick_len: time::Duration) -> Clock {
         Clock {
-            start: self.start,
+            started_at: self.started_at,
             tick_len: tick_len,
         }
     }
 
     /// Get start time
-    pub fn start(&self) -> time::Instant {
-        self.start
+    pub fn started_at(&self) -> time::Instant {
+        self.started_at
     }
 
     /// Waits for the next clock tick.
@@ -94,13 +94,13 @@ impl Clock {
         // uses signed math because ntp might put us in the past
         let now = time::Instant::now();
 
-        let elapsed_ns = (now - self.start).as_ns();
+        let elapsed_ns = (now - self.started_at).as_ns();
         let tick_len_ns = self.tick_len.as_ns();
 
         let current_tick_num = elapsed_ns / tick_len_ns;
         let next_tick_num = current_tick_num + 1;
 
-        let next_tick = self.start + self.tick_len * next_tick_num as u32;
+        let next_tick = self.started_at + self.tick_len * next_tick_num as u32;
         let until_next: time::Duration = next_tick - now;
 
         thread::sleep(until_next);
@@ -148,6 +148,6 @@ impl<'a> iter::Iterator for ClockIterRelative<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let (n, t) = self.0.wait_until_tick();
-        Some((n, t - self.0.start))
+        Some((n, t - self.0.started_at))
     }
 }
