@@ -4,7 +4,7 @@
 
 use std::fmt;
 use time::precise_time_ns;
-use ::SECOND;
+use SECOND;
 
 
 #[derive(Debug)]
@@ -22,10 +22,12 @@ impl FrameCounter {
     /// Creates a new frame counter with a specific slice size.
     pub fn new_with_slice_size(slice_size_ns: u64) -> FrameCounter {
         let now_ns = precise_time_ns();
-        FrameCounter{start_ns: now_ns,
-                     frame_count: 0,
-                     slice_size_ns: slice_size_ns,
-                     fps: 0.0}
+        FrameCounter {
+            start_ns: now_ns,
+            frame_count: 0,
+            slice_size_ns: slice_size_ns,
+            fps: 0.0,
+        }
     }
 
     /// Creates a new frame counter with a default slice size of 1 second.

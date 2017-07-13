@@ -58,14 +58,13 @@ impl Timer {
     /// Creates a new timer.
     ///
     /// Create a timer with a tick length of `tick_len_ms` in ms.
-    pub fn new(tick_len: time::Duration) -> Timer{
+    pub fn new(tick_len: time::Duration) -> Timer {
         Timer::new_with_start_time(tick_len, time::Instant::now())
     }
 
     /// Creates a new timer with a specific start time
-    pub fn new_with_start_time(tick_len: time::Duration,
-                               start: time::Instant) -> Timer {
-        Timer{
+    pub fn new_with_start_time(tick_len: time::Duration, start: time::Instant) -> Timer {
+        Timer {
             next_tick: start + tick_len,
             tick_len: tick_len,
         }
@@ -123,7 +122,7 @@ impl Timer {
     /// Passing in `wait` as `false` causes the tick length to be changed
     /// immediately, which could result in the current tick to end instantly.
     pub fn set_tick_len(&mut self, tick_len: time::Duration, wait: bool) {
-        if ! wait {
+        if !wait {
             self.next_tick = self.next_tick - self.tick_len + tick_len
         }
         self.tick_len = tick_len
@@ -153,10 +152,8 @@ mod tests {
     fn test_minimum_duration() {
         let now = time::Instant::now();
 
-        let mut t1 = Timer::new_with_start_time(time::Duration::from_millis
-                                            (10), now);
-        let mut t2 = Timer::new_with_start_time(time::Duration::from_millis
-                                            (50), now);
+        let mut t1 = Timer::new_with_start_time(time::Duration::from_millis(10), now);
+        let mut t2 = Timer::new_with_start_time(time::Duration::from_millis(50), now);
 
         let later = now + time::Duration::from_millis(15);
 
@@ -183,9 +180,13 @@ mod tests {
         let timers = vec![t2, t1];
 
         // find max and min
-        assert_eq!(timers.iter().map(|t| t.remaining(later)).min().unwrap(),
-                   time::Duration::from_millis(5));
-        assert_eq!(timers.iter().map(|t| t.remaining(later)).max().unwrap(),
-                   time::Duration::from_millis(35));
+        assert_eq!(
+            timers.iter().map(|t| t.remaining(later)).min().unwrap(),
+            time::Duration::from_millis(5)
+        );
+        assert_eq!(
+            timers.iter().map(|t| t.remaining(later)).max().unwrap(),
+            time::Duration::from_millis(35)
+        );
     }
 }
