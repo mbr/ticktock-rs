@@ -4,7 +4,7 @@
 //! possible.
 
 use std::{iter, time, thread};
-use util::{FromSecondsFloat, AsNanoSeconds};
+use util::{SecondsFloat, NanoSeconds};
 
 /// Clock structure.
 pub struct Clock {
@@ -70,7 +70,7 @@ impl Clock {
     pub fn framerate_with_start_time(fps: f64, start: time::Instant) -> Clock {
         let frame_time_s = 1.0 / fps;
 
-        Clock::new_with_start_time(frame_time_s.from_fsecs(), start)
+        Clock::new_with_start_time(time::Duration::from_fsecs(frame_time_s), start)
     }
 
     /// Creates a new clock with a different tick length that is synced to
