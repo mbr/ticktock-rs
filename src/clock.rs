@@ -4,7 +4,7 @@
 //! possible.
 
 use std::{iter, time, thread};
-use util::{FromFSecs, NanoConv};
+use util::{FromSecondsFloat, AsNanoSeconds};
 
 /// Clock structure.
 pub struct Clock {

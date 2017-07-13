@@ -1,5 +1,5 @@
 use std::time;
-use util::NanoConv;
+use util::AsNanoSeconds;
 
 #[derive(Debug)]
 pub struct TimerBuilder<F, V, R>

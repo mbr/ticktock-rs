@@ -1,7 +1,7 @@
 //! Non self-updating interval timers
 
 use std::time;
-use ::util::NanoConv;
+use util::AsNanoSeconds;
 
 /// Interval-timer
 ///
