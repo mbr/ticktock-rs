@@ -2,7 +2,7 @@
 name = "ticktock"
 version = "0.4.0"
 authors = ["Marc Brinkmann <git@marcbrinkmann.de>"]
-description = "A constant clock source for your frame timing needs"
+description = "Best effort constant framerate clock and fast timers"
 license = "MIT"
 repository = "https://github.com/mbr/ticktock-rs"
 documentation = "http://docs.rs/ticktock"
