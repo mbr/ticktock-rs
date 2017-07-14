@@ -42,7 +42,6 @@
 //! }
 //! ```
 
-
 pub mod clock;
 pub mod util;
 pub mod timer;
