@@ -138,7 +138,11 @@ where
 
     /// Execute function and calculate next execution instant
     ///
-    /// If
+    /// If `now` is less than the next execution instant, i.e. execution
+    /// is not yet due, the function is not called, and `None` is returned.
+    ///
+    /// Otherwise, the the next execution instant is calculated, the function
+    /// called and the new value returned.
     pub fn update(&mut self, now: time::Instant) -> Option<R> {
         // check if timer needs to fire
         if self.next_tick > now {
@@ -191,7 +195,6 @@ where
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -230,7 +233,6 @@ mod tests {
         let mut timer = Timer::apply(|_, count| *count += 1, 0)
             .every(time::Duration::from_millis(50))
             .start(now);
-
 
         assert_eq!(timer.value(), 0);
         let future = now + time::Duration::from_millis(49);
