@@ -5,8 +5,8 @@
 
 // FIXME: clock should start immediately, not waiting the initial interval
 
-use std::{iter, time, thread};
-use util::{SecondsFloat, NanoSeconds};
+use std::{iter, thread, time};
+use util::{NanoSeconds, SecondsFloat};
 
 /// Clock structure.
 pub struct Clock {
@@ -45,7 +45,7 @@ pub struct Clock {
 ///    assert!(time::Duration::from_secs(1) < end-start);
 /// }
 /// ```
-pub struct ClockIter<'a>(&'a mut Clock);
+pub struct ClockIter<'a>(&'a Clock);
 
 impl Clock {
     /// Creates a new clock.
@@ -117,7 +117,7 @@ impl Clock {
     /// Returns (current tick number, absolute time) on each iteration, where
     /// absolute time is relative to a fixed offset that depends on the machine
     /// (see `Instant`).
-    pub fn iter(&mut self) -> ClockIter {
+    pub fn iter(&self) -> ClockIter {
         ClockIter(self)
     }
 
@@ -126,7 +126,7 @@ impl Clock {
     /// Similar to `iter()`, but the resulting iterator will return a tuple of
     /// (current tick number, relative time), with relative time being a
     /// `time::Duration` from the start of the clock.
-    pub fn rel_iter(&mut self) -> ClockIterRelative {
+    pub fn rel_iter(&self) -> ClockIterRelative {
         ClockIterRelative(self)
     }
 }
@@ -143,7 +143,7 @@ impl<'a> iter::Iterator for ClockIter<'a> {
 ///
 /// The resulting returned tuple will be of the form `(tick_number,
 /// duration_since_clock_start)`
-pub struct ClockIterRelative<'a>(&'a mut Clock);
+pub struct ClockIterRelative<'a>(&'a Clock);
 
 impl<'a> iter::Iterator for ClockIterRelative<'a> {
     type Item = (u64, time::Duration);
