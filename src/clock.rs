@@ -89,6 +89,11 @@ impl Clock {
         self.started_at
     }
 
+    /// Returns the tick number preceding an specific instant in time
+    pub fn tick_num_at(&self, now: time::Instant) -> u64 {
+        (now - self.started_at).as_ns() / self.tick_len.as_ns()
+    }
+
     /// Waits for the next clock tick.
     ///
     /// Will wait until the next tick and return the current tick count.
@@ -96,10 +101,7 @@ impl Clock {
         // uses signed math because ntp might put us in the past
         let now = time::Instant::now();
 
-        let elapsed_ns = (now - self.started_at).as_ns();
-        let tick_len_ns = self.tick_len.as_ns();
-
-        let current_tick_num = elapsed_ns / tick_len_ns;
+        let current_tick_num = self.tick_num_at(now);
         let next_tick_num = current_tick_num + 1;
 
         let next_tick = self.started_at + self.tick_len * next_tick_num as u32;
