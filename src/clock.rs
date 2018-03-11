@@ -51,11 +51,13 @@ impl Clock {
     /// Creates a new clock.
     ///
     /// Create a clock with a tick size of `tick_len_ms`, in ms.
+    #[inline]
     pub fn new(tick_len: time::Duration) -> Clock {
         Clock::new_with_start_time(tick_len, time::Instant::now())
     }
 
     /// Creates a new clock with a specified start time
+    #[inline]
     pub fn new_with_start_time(tick_len: time::Duration, start: time::Instant) -> Clock {
         Clock {
             started_at: start,
@@ -64,11 +66,13 @@ impl Clock {
     }
 
     /// Creates a new fixed-framerate clock
+    #[inline]
     pub fn framerate(fps: f64) -> Clock {
         Clock::framerate_with_start_time(fps, time::Instant::now())
     }
 
     /// Creates a new fixed-framerate clock with a specified sart time
+    #[inline]
     pub fn framerate_with_start_time(fps: f64, start: time::Instant) -> Clock {
         let frame_time_s = 1.0 / fps;
 
@@ -77,6 +81,7 @@ impl Clock {
 
     /// Creates a new clock with a different tick length that is synced to
     /// the original clock
+    #[inline]
     pub fn synced(&self, tick_len: time::Duration) -> Clock {
         Clock {
             started_at: self.started_at,
@@ -85,11 +90,13 @@ impl Clock {
     }
 
     /// Get start time
+    #[inline]
     pub fn started_at(&self) -> time::Instant {
         self.started_at
     }
 
     /// Returns the tick number preceding an specific instant in time
+    #[inline]
     pub fn tick_num_at(&self, now: time::Instant) -> u64 {
         (now - self.started_at).as_ns() / self.tick_len.as_ns()
     }
@@ -97,6 +104,7 @@ impl Clock {
     /// Waits for the next clock tick.
     ///
     /// Will wait until the next tick and return the current tick count.
+    #[inline]
     pub fn wait_until_tick(&self) -> (u64, time::Instant) {
         // uses signed math because ntp might put us in the past
         let now = time::Instant::now();
@@ -119,6 +127,7 @@ impl Clock {
     /// Returns (current tick number, absolute time) on each iteration, where
     /// absolute time is relative to a fixed offset that depends on the machine
     /// (see `Instant`).
+    #[inline]
     pub fn iter(&self) -> ClockIter {
         ClockIter(self)
     }
@@ -128,6 +137,7 @@ impl Clock {
     /// Similar to `iter()`, but the resulting iterator will return a tuple of
     /// (current tick number, relative time), with relative time being a
     /// `time::Duration` from the start of the clock.
+    #[inline]
     pub fn rel_iter(&self) -> ClockIterRelative {
         ClockIterRelative(self)
     }
@@ -136,6 +146,7 @@ impl Clock {
 impl<'a> iter::Iterator for ClockIter<'a> {
     type Item = (u64, time::Instant);
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         Some(self.0.wait_until_tick())
     }
@@ -150,6 +161,7 @@ pub struct ClockIterRelative<'a>(&'a Clock);
 impl<'a> iter::Iterator for ClockIterRelative<'a> {
     type Item = (u64, time::Duration);
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let (n, t) = self.0.wait_until_tick();
         Some((n, t - self.0.started_at))
