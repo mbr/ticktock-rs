@@ -43,8 +43,9 @@
 //! ```
 
 pub mod clock;
-pub mod util;
+pub mod delay;
 pub mod timer;
+pub mod util;
 
 pub use clock::Clock;
 pub use timer::Timer;
