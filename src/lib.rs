@@ -81,6 +81,20 @@ pub use util::SecondsFloat;
 /// # // our test will fail, because there is noting listening at 12348
 /// # assert!(conn.is_err());
 /// ```
+///
+/// `Option` is also a valid outcome:
+///
+/// ```ignore
+/// let credentials = vec![("Bob", "secret"), ("Jeff", "hunter2"), ("John", "swordfish")];
+///
+/// fn try_login(username: &str, password: &str) -> Option<(String, String)> { ... }
+///
+/// // brute-force our way in
+/// let valid_credentials: Option<(String, String)> = credentials
+///                                                       .map(|(u, p)| try_login(u, p))
+///                                                       .attempt()
+///                                                       .unwrap();
+/// ```
 
 // note: this could probably be expressed more cleanly by using associated types
 // (i.e. `type Outcome = ...`), but a bug in the rust compiler at the time of this writing
