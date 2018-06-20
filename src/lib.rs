@@ -111,3 +111,73 @@ where
         rv
     }
 }
+
+impl<T, I> Attempt for I
+where
+    I: Iterator<Item = Option<T>>,
+{
+    type Outcome = Option<T>;
+
+    fn attempt(self) -> Option<Self::Outcome> {
+        let mut rv = None;
+
+        for res in self {
+            rv = Some(res);
+
+            // do not keep going if we got an Ok
+            if let Some(Some(_)) = rv {
+                break;
+            }
+        }
+
+        rv
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Attempt;
+
+    #[test]
+    fn attempt_works_on_ok_results() {
+        let rs = vec![Err(1), Err(2), Err(3), Ok(4), Ok(5)];
+
+        assert_eq!(Some(Ok(4)), rs.into_iter().attempt());
+    }
+
+    #[test]
+    fn attempt_works_on_err_results() {
+        let rs: Vec<Result<(), _>> = vec![Err(1), Err(2), Err(3)];
+
+        assert_eq!(Some(Err(3)), rs.into_iter().attempt());
+    }
+
+    #[test]
+    fn attempt_works_on_empty_result_vecs() {
+        let rs: Vec<Result<(), ()>> = Vec::new();
+
+        assert_eq!(None, rs.into_iter().attempt());
+    }
+
+    #[test]
+    fn attempt_works_on_some_options() {
+        let rs = vec![None, None, None, Some(4), Some(5)];
+
+        assert_eq!(Some(Some(4)), rs.into_iter().attempt());
+    }
+
+    #[test]
+    fn attempt_works_on_none_options() {
+        let rs: Vec<Option<()>> = vec![None, None, None];
+
+        assert_eq!(Some(None), rs.into_iter().attempt());
+    }
+
+    #[test]
+    fn attempt_works_on_empty_option_vecs() {
+        let rs: Vec<Option<()>> = Vec::new();
+
+        assert_eq!(None, rs.into_iter().attempt());
+    }
+
+}
