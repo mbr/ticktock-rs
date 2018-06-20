@@ -82,21 +82,21 @@ pub use util::SecondsFloat;
 /// # assert!(conn.is_err());
 /// ```
 
-pub trait Attempt {
-    type Outcome;
+// note: this could probably be expressed more cleanly by using associated types
+// (i.e. `type Outcome = ...`), but a bug in the rust compiler at the time of this writing
+// did not allow for it https://github.com/rust-lang/rust/issues/20400
 
+pub trait Attempt<O> {
     /// Consumes until the successful outcome is encountered. In case of failure, returns the last
     /// unsuccessful outcome.
-    fn attempt(self) -> Option<Self::Outcome>;
+    fn attempt(self) -> Option<O>;
 }
 
-impl<T, E, I> Attempt for I
+impl<T, E, I> Attempt<Result<T, E>> for I
 where
     I: Iterator<Item = Result<T, E>>,
 {
-    type Outcome = Result<T, E>;
-
-    fn attempt(self) -> Option<Self::Outcome> {
+    fn attempt(self) -> Option<Result<T, E>> {
         let mut rv = None;
 
         for res in self {
@@ -112,13 +112,11 @@ where
     }
 }
 
-impl<T, I> Attempt for I
+impl<T, I> Attempt<Option<T>> for I
 where
     I: Iterator<Item = Option<T>>,
 {
-    type Outcome = Option<T>;
-
-    fn attempt(self) -> Option<Self::Outcome> {
+    fn attempt(self) -> Option<Option<T>> {
         let mut rv = None;
 
         for res in self {
