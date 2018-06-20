@@ -51,3 +51,63 @@ pub use clock::Clock;
 pub use timer::Timer;
 pub use util::NanoSeconds;
 pub use util::SecondsFloat;
+
+/// Iterator attempt
+///
+/// Given an iterator of outcomes, iterates returning either
+///
+/// * the first successful outcome
+/// * the last unsuccessful outcome
+/// * `None` if the iterator was empty
+///
+/// `Result` is often used as an outcome, e.g. when trying to reconnect multiple times:
+///
+/// ```rust
+/// use std::net::TcpStream;
+/// use std::time::Duration;
+/// use ticktock::Attempt;
+/// use ticktock::delay::Delay;
+///
+/// const RETRY_DELAY: Duration = Duration::from_millis(250);
+///
+/// // attempt to connect to localhost:12348 three times, before giving up.
+/// // in total, 500 ms of delay will be inserted
+/// let conn = Delay::new(RETRY_DELAY)
+///                .map(|_| TcpStream::connect("localhost:12348"))
+///                .take(3)
+///                .attempt()
+///                .unwrap();
+///
+/// # // our test will fail, because there is noting listening at 12348
+/// # assert!(conn.is_err());
+/// ```
+
+pub trait Attempt {
+    type Outcome;
+
+    /// Consumes until the successful outcome is encountered. In case of failure, returns the last
+    /// unsuccessful outcome.
+    fn attempt(self) -> Option<Self::Outcome>;
+}
+
+impl<T, E, I> Attempt for I
+where
+    I: Iterator<Item = Result<T, E>>,
+{
+    type Outcome = Result<T, E>;
+
+    fn attempt(self) -> Option<Self::Outcome> {
+        let mut rv = None;
+
+        for res in self {
+            rv = Some(res);
+
+            // do not keep going if we got an Ok
+            if let Some(Ok(_)) = rv {
+                break;
+            }
+        }
+
+        rv
+    }
+}
