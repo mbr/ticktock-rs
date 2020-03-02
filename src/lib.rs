@@ -7,7 +7,7 @@
 //!
 //! ```ignore
 //! use std::time;
-//! use ticktock::{Clock, SecondsFloat, Timer};
+//! use ticktock::{Clock, Timer};
 //!
 //! let now = time::Instant::now();
 //!
@@ -30,7 +30,7 @@
 //!     if let Some((delta_t, prev_tick)) = fps_counter.update(now) {
 //!         fps_counter.set_value(tick);
 //!
-//!         let fps = (tick - prev_tick) as f64 / delta_t.as_fsecs();
+//!         let fps = (tick - prev_tick) as f64 / delta_t.as_secs_f64();
 //!         println!("FPS: {}", fps);
 //!     }
 //!     break; // ignore, for doctests
@@ -45,7 +45,6 @@ pub mod util;
 pub use crate::clock::Clock;
 pub use crate::timer::Timer;
 pub use crate::util::NanoSeconds;
-pub use crate::util::SecondsFloat;
 
 /// Iterator attempt
 ///

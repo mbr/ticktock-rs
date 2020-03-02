@@ -5,7 +5,7 @@
 
 // FIXME: clock should start immediately, not waiting the initial interval
 
-use crate::util::{NanoSeconds, SecondsFloat};
+use crate::util::NanoSeconds;
 use std::{iter, thread, time};
 
 /// Clock structure.
@@ -72,7 +72,7 @@ impl Clock {
     pub fn framerate_with_start_time(fps: f64, start: time::Instant) -> Clock {
         let frame_time_s = 1.0 / fps;
 
-        Clock::new_with_start_time(time::Duration::from_fsecs(frame_time_s), start)
+        Clock::new_with_start_time(time::Duration::from_secs_f64(frame_time_s), start)
     }
 
     /// Creates a new clock with a different tick length that is synced to
