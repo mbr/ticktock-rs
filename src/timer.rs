@@ -30,8 +30,8 @@
 //! }
 //! ```
 
+use crate::util::NanoSeconds;
 use std::time;
-use util::NanoSeconds;
 
 /// A timer builder
 ///
@@ -211,8 +211,9 @@ mod tests {
                 *v
             },
             12,
-        ).every(time::Duration::from_millis(500))
-            .start(now);
+        )
+        .every(time::Duration::from_millis(500))
+        .start(now);
     }
 
     #[test]

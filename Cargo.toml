@@ -6,5 +6,6 @@ description = "Best effort constant framerate clock and fast timers"
 license = "MIT"
 repository = "https://github.com/mbr/ticktock-rs"
 documentation = "http://docs.rs/ticktock"
+edition = "2018"
 
 [dependencies]

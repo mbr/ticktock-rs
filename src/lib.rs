@@ -47,10 +47,10 @@ pub mod delay;
 pub mod timer;
 pub mod util;
 
-pub use clock::Clock;
-pub use timer::Timer;
-pub use util::NanoSeconds;
-pub use util::SecondsFloat;
+pub use crate::clock::Clock;
+pub use crate::timer::Timer;
+pub use crate::util::NanoSeconds;
+pub use crate::util::SecondsFloat;
 
 /// Iterator attempt
 ///
@@ -191,5 +191,4 @@ mod test {
 
         assert_eq!(None, rs.into_iter().attempt());
     }
-
 }

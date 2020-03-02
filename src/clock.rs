@@ -5,8 +5,8 @@
 
 // FIXME: clock should start immediately, not waiting the initial interval
 
+use crate::util::{NanoSeconds, SecondsFloat};
 use std::{iter, thread, time};
-use util::{NanoSeconds, SecondsFloat};
 
 /// Clock structure.
 pub struct Clock {
