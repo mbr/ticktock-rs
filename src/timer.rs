@@ -32,7 +32,6 @@
 //! }
 //! ```
 
-use crate::util::NanoSeconds;
 use std::time;
 
 /// A timer builder
@@ -94,7 +93,7 @@ where
             func: self.func,
             value: self.initial,
             interval,
-            interval_ns: interval.as_ns(),
+            interval_ns: interval.as_nanos(),
             next_tick,
         }
     }
@@ -108,7 +107,7 @@ where
     func: F,
     value: V,
     interval: time::Duration,
-    interval_ns: u64,
+    interval_ns: u128,
     next_tick: time::Instant,
 }
 
@@ -155,7 +154,7 @@ where
         let dt = now - self.next_tick + self.interval;
 
         // calculate how many ticks we already passed
-        let dt_ns = dt.as_ns();
+        let dt_ns = dt.as_nanos();
         let ticks = dt_ns / self.interval_ns;
 
         // next tick

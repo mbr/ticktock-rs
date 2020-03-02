@@ -5,7 +5,6 @@
 
 // FIXME: clock should start immediately, not waiting the initial interval
 
-use crate::util::NanoSeconds;
 use std::{iter, thread, time};
 
 /// Clock structure.
@@ -93,15 +92,15 @@ impl Clock {
 
     /// Returns the tick number preceding an specific instant in time
     #[inline]
-    pub fn tick_num_at(&self, now: time::Instant) -> u64 {
-        (now - self.started_at).as_ns() / self.tick_len.as_ns()
+    pub fn tick_num_at(&self, now: time::Instant) -> u128 {
+        (now - self.started_at).as_nanos() / self.tick_len.as_nanos()
     }
 
     /// Waits for the next clock tick.
     ///
     /// Will wait until the next tick and return the current tick count.
     #[inline]
-    pub fn wait_until_tick(&self) -> (u64, time::Instant) {
+    pub fn wait_until_tick(&self) -> (u128, time::Instant) {
         // uses signed math because ntp might put us in the past
         let now = time::Instant::now();
 
@@ -140,7 +139,7 @@ impl Clock {
 }
 
 impl<'a> iter::Iterator for ClockIter<'a> {
-    type Item = (u64, time::Instant);
+    type Item = (u128, time::Instant);
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -155,7 +154,7 @@ impl<'a> iter::Iterator for ClockIter<'a> {
 pub struct ClockIterRelative<'a>(&'a Clock);
 
 impl<'a> iter::Iterator for ClockIterRelative<'a> {
-    type Item = (u64, time::Duration);
+    type Item = (u128, time::Duration);
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {

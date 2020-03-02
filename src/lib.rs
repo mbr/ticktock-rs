@@ -40,11 +40,9 @@
 pub mod clock;
 pub mod delay;
 pub mod timer;
-pub mod util;
 
 pub use crate::clock::Clock;
 pub use crate::timer::Timer;
-pub use crate::util::NanoSeconds;
 
 /// Iterator attempt
 ///
