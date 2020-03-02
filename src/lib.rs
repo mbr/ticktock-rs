@@ -6,39 +6,34 @@
 //! An example game loop:
 //!
 //! ```ignore
-//! extern crate ticktock;
-//!
 //! use std::time;
 //! use ticktock::{Clock, SecondsFloat, Timer};
 //!
-//! fn main() {
-//!     let now = time::Instant::now();
+//! let now = time::Instant::now();
 //!
-//!     // initialize game
+//! // initialize game
+//! // ...
+//!
+//! // show some fps measurements every 5 seconds
+//! let mut fps_counter = Timer::apply(|delta_t, prev_tick| (delta_t, *prev_tick), 0)
+//!     .every(time::Duration::from_secs(5))
+//!     .start(now);
+//!
+//! // run with a constant framerate of 30 fps
+//! for (tick, now) in Clock::framerate(30.0).iter() {
+//!     // this loop will run approx. every 33.3333 ms
+//!
+//!     // update, render, etc
 //!     // ...
 //!
-//!     // show some fps measurements every 5 seconds
-//!     let mut fps_counter = Timer::apply(|delta_t, prev_tick|
-//!                                        (delta_t, *prev_tick), 0)
-//!                                 .every(time::Duration::from_secs(5))
-//!                                 .start(now);
+//!     // update or display fps count
+//!     if let Some((delta_t, prev_tick)) = fps_counter.update(now) {
+//!         fps_counter.set_value(tick);
 //!
-//!     // run with a constant framerate of 30 fps
-//!     for (tick, now) in Clock::framerate(30.0).iter() {
-//!         // this loop will run approx. every 33.3333 ms
-//!
-//!         // update, render, etc
-//!         // ...
-//!
-//!         // update or display fps count
-//!         if let Some((delta_t, prev_tick)) = fps_counter.update(now) {
-//!             fps_counter.set_value(tick);
-//!
-//!             let fps = (tick - prev_tick) as f64 / delta_t.as_fsecs();
-//!             println!("FPS: {}", fps);
-//!         }
-//!         break;  // ignore, for doctests
+//!         let fps = (tick - prev_tick) as f64 / delta_t.as_fsecs();
+//!         println!("FPS: {}", fps);
 //!     }
+//!     break; // ignore, for doctests
 //! }
 //! ```
 
@@ -65,18 +60,18 @@ pub use crate::util::SecondsFloat;
 /// ```rust
 /// use std::net::TcpStream;
 /// use std::time::Duration;
-/// use ticktock::Attempt;
 /// use ticktock::delay::Delay;
+/// use ticktock::Attempt;
 ///
 /// const RETRY_DELAY: Duration = Duration::from_millis(250);
 ///
 /// // attempt to connect to localhost:12348 three times, before giving up.
 /// // in total, 500 ms of delay will be inserted
 /// let conn = Delay::new(RETRY_DELAY)
-///                .map(|_| TcpStream::connect("localhost:12348"))
-///                .take(3)
-///                .attempt()
-///                .unwrap();
+///     .map(|_| TcpStream::connect("localhost:12348"))
+///     .take(3)
+///     .attempt()
+///     .unwrap();
 ///
 /// # // our test will fail, because there is noting listening at 12348
 /// # assert!(conn.is_err());

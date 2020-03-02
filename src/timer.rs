@@ -10,22 +10,24 @@
 //! Example:
 //!
 //! ```
-//! extern crate ticktock;
-//!
 //! use std::time;
 //! use ticktock::Timer;
 //!
-//! fn main() {
-//!     let now = time::Instant::now();
-//!     let mut heartbeat = Timer::apply(|_, count| { *count += 1; *count }, 0)
-//!                               .every(time::Duration::from_millis(500))
-//!                               .start(now);
+//! let now = time::Instant::now();
+//! let mut heartbeat = Timer::apply(
+//!     |_, count| {
+//!         *count += 1;
+//!         *count
+//!     },
+//!     0,
+//! )
+//! .every(time::Duration::from_millis(500))
+//! .start(now);
 //!
-//!     for i in 0..10 {
+//! for i in 0..10 {
 //!     let now = time::Instant::now();
-//!          if let Some(n) = heartbeat.update(now) {
-//!              println!("Heartbeat: {}", n);
-//!          }
+//!     if let Some(n) = heartbeat.update(now) {
+//!         println!("Heartbeat: {}", n);
 //!     }
 //! }
 //! ```
@@ -54,8 +56,8 @@ where
     #[inline]
     fn new(func: F, initial: V) -> TimerBuilder<F, V, R> {
         TimerBuilder {
-            func: func,
-            initial: initial,
+            func,
+            initial,
             interval: None,
             repeat: true,
         }
@@ -91,9 +93,9 @@ where
         Timer {
             func: self.func,
             value: self.initial,
-            interval: interval,
+            interval,
             interval_ns: interval.as_ns(),
-            next_tick: next_tick,
+            next_tick,
         }
     }
 }

@@ -21,29 +21,25 @@ pub struct Clock {
 /// Used to iterate over the clock:
 ///
 /// ```
-/// extern crate ticktock;
-///
 /// use std::time;
 /// use ticktock::Clock;
 ///
-/// fn main() {
-///     let start = time::Instant::now();
-///     // ticks once per second
-///     let mut clock = Clock::new(time::Duration::from_secs(1));
+/// let start = time::Instant::now();
+/// // ticks once per second
+/// let mut clock = Clock::new(time::Duration::from_secs(1));
 ///
-///     // as soon as the clock starts, it will wait for the next tick.
-///     // in this case, we'll start at t = 1 second
-///     for tick in clock.iter() {
-///         // ...
+/// // as soon as the clock starts, it will wait for the next tick.
+/// // in this case, we'll start at t = 1 second
+/// for tick in clock.iter() {
+///     // ...
 ///
-///         // a simple break will exit
-///         break;
-///     }
-///
-///    let end = time::Instant::now();
-///
-///    assert!(time::Duration::from_secs(1) < end-start);
+///     // a simple break will exit
+///     break;
 /// }
+///
+/// let end = time::Instant::now();
+///
+/// assert!(time::Duration::from_secs(1) < end - start);
 /// ```
 pub struct ClockIter<'a>(&'a Clock);
 
@@ -61,7 +57,7 @@ impl Clock {
     pub fn new_with_start_time(tick_len: time::Duration, start: time::Instant) -> Clock {
         Clock {
             started_at: start,
-            tick_len: tick_len,
+            tick_len,
         }
     }
 
@@ -85,7 +81,7 @@ impl Clock {
     pub fn synced(&self, tick_len: time::Duration) -> Clock {
         Clock {
             started_at: self.started_at,
-            tick_len: tick_len,
+            tick_len,
         }
     }
 
@@ -116,7 +112,7 @@ impl Clock {
         let until_next: time::Duration = next_tick - now;
 
         thread::sleep(until_next);
-        return (next_tick_num, next_tick);
+        (next_tick_num, next_tick)
     }
 
     /// Creates a clock iterator.
