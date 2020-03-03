@@ -39,6 +39,7 @@
 
 pub mod clock;
 pub mod delay;
+pub mod reader;
 pub mod timer;
 
 pub use crate::clock::Clock;
