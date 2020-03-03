@@ -1,6 +1,6 @@
 [package]
 name = "ticktock"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["Marc Brinkmann <git@marcbrinkmann.de>"]
 description = "Best effort constant framerate clock and fast timers"
 license = "MIT"
