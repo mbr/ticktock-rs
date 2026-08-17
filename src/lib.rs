@@ -1,3 +1,10 @@
+//! # Deprecated
+//!
+//! This crate is deprecated. For synchronous interval timers, use
+//! [`spin_sleep_util`](https://docs.rs/spin_sleep_util) and call
+//! `Interval::tick_no_spin()` to wait without busy-spinning. See the
+//! [migration guide](https://github.com/mbr/ticktock-rs#migration).
+//!
 //! Timing module for frame-based applications
 //!
 //! Contains methods for slowing down to a fixed framerate, as well as
